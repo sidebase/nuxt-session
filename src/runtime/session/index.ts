@@ -65,9 +65,12 @@ const ensureSession = async (event: H3Event) => {
   }
 
   // Start a new session if session is expired (aka: too old)
-  const now = dayjs()
-  if (now.diff(dayjs(session.createdAt), 'seconds') > useConfig().sessionExpiryInSeconds) {
-    session = await newSession(event)
+  const sessionExpiryInSeconds = useConfig().sessionExpiryInSeconds
+  if (sessionExpiryInSeconds !== null) {
+    const now = dayjs()
+    if (now.diff(dayjs(session.createdAt), 'seconds') > useConfig().sessionExpiryInSeconds) {
+      session = await newSession(event)
+    }
   }
 
   event.context.session = session

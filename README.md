@@ -53,3 +53,5 @@ export default defineEventHandler((event: CompatibilityEvent) => event.context.s
 
 - Run `npm run dev:prepare` to generate type stubs.
 - Use `npm run dev` to start [playground](./playground) in development mode.
+- Run `npm run lint` to run eslint
+- Run `npm run lint` to run typescheck via tsc

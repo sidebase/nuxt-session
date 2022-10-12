@@ -1,6 +1,6 @@
 {
   "name": "@sidebase/nuxt-session",
-  "version": "1.0.0",
+  "version": "0.0.1",
   "license": "MIT",
   "type": "module",
   "exports": {
@@ -18,10 +18,13 @@
     "prepack": "nuxt-module-build",
     "dev": "nuxi dev playground",
     "dev:build": "nuxi build playground",
-    "dev:prepare": "nuxt-module-build --stub && nuxi prepare playground"
+    "dev:prepare": "nuxt-module-build --stub && nuxi prepare playground",
+    "lint": "eslint .",
+    "types": "tsc --noEmit"
   },
   "dependencies": {
     "@nuxt/kit": "^3.0.0-rc.11",
+    "@sidebase/nuxt-session": "^0.0.1",
     "dayjs": "^1.11.5",
     "h3": "^0.7.21",
     "unstorage": "^0.5.6"

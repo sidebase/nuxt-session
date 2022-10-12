@@ -1,14 +1,58 @@
 import { resolve } from 'path'
 import { fileURLToPath } from 'url'
 import { addServerHandler, defineNuxtModule, useLogger } from '@nuxt/kit'
-import { SessionOptions } from './runtime/session/config'
+import { CreateStorageOptions } from 'unstorage'
 
-export interface ModuleOptions extends SessionOptions {
-  isEnabled: boolean
+export type SameSiteOptions = 'lax' | 'strict' | 'none'
+export interface ModuleOptions {
+  /**
+   * Whether to enable the module
+   * @default true
+   * @example true
+   * @type boolean
+   */
+  isEnabled: boolean,
+  /**
+   * Set the session duration in seconds. Once the session expires, a new one with a new id will be created. Set to `null` for infinite sessions
+   * @default 600
+   * @example 30
+   * @type number | null
+   */
+   sessionExpiryInSeconds: number | null
+   /**
+    * How many characters the random session id should be long
+    * @default 64
+    * @example 128
+    * @type number
+    */
+   sessionIdLength: number
+   /**
+    * What prefix to use to store session information via `unstorage`
+    * @default 64
+    * @example 128
+    * @type number
+    * @docs https://github.com/unjs/unstorage
+    */
+   sessionStorePrefix: string
+   /**
+    * When to attach session cookie to requests
+    * @default 'lax'
+    * @example 'strict'
+    * @type SameSiteOptions
+    * @docs https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite
+    */
+   sessionCookieSameSite: SameSiteOptions
+   /**
+    * Driver configuration for session-storage. Per default in-memory storage is used
+    * @default {}
+    * @example { driver: redisDriver({ base:  'storage:' }) }
+    * @type CreateStorageOptions
+    * @docs https://github.com/unjs/unstorage
+    */
+   sessionStorageOptions: CreateStorageOptions
 }
 
-export const PACKAGE_NAME = 'nuxt-session'
-export const LOGGER = useLogger(PACKAGE_NAME)
+const PACKAGE_NAME = 'nuxt-session'
 
 export default defineNuxtModule<ModuleOptions>({
   meta: {
@@ -21,18 +65,21 @@ export default defineNuxtModule<ModuleOptions>({
   defaults: {
     isEnabled: true,
     sessionExpiryInSeconds: 60 * 10,
-    sessionIdLength: 2,
+    sessionIdLength: 64,
     sessionStorePrefix: 'sessions',
-    sessionCookieSameSite: 'lax'
+    sessionCookieSameSite: 'lax',
+    sessionStorageOptions: {}
   },
   hooks: {},
-  setup(moduleOptions, nuxt) {
+  setup (moduleOptions, nuxt) {
+    const logger = useLogger(PACKAGE_NAME)
+
     if (!moduleOptions.isEnabled) {
-      LOGGER.info(`Skipping ${PACKAGE_NAME} setup, as module is disabled`)
+      logger.info(`Skipping ${PACKAGE_NAME} setup, as module is disabled`)
       return
     }
 
-    LOGGER.info('Setting up module...')
+    logger.info('Setting up module...')
 
     const runtimeDir = fileURLToPath(new URL('./runtime', import.meta.url))
 
@@ -50,6 +97,6 @@ export default defineNuxtModule<ModuleOptions>({
     addServerHandler(serverHandler)
     // nuxt.options.serverHandlers.unshift(serverHandler)
 
-    LOGGER.success('Module setup complete')
+    logger.success('Module setup complete')
   }
 })
