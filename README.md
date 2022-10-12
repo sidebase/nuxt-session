@@ -47,7 +47,7 @@ To use the session on the client side (i.e., in your client app) you could creat
 ```ts
 // File: `server/api/me.get.ts`
 export default defineEventHandler((event: CompatibilityEvent) => event.context.session)
-``
+```
 
 ## Development
 
