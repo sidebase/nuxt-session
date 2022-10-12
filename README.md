@@ -1,6 +1,10 @@
 # nuxt-session
 
-Nuxt module that adds a managed session to your application.
+[![Follow us on Twitter](https://badgen.net/badge/icon/twitter?icon=twitter&label)](https://twitter.com/sidebase_io)
+[![Join our Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/9MUHR8WT9B)
+[![GitHub stars](https://badgen.net/github/stars/sidebase/nuxt-session)](https://GitHub.com/sidebase/nuxt-session/)
+
+Nuxt session middleware to persist data across multiple requests, supports many backends via unjs/unstorage: memory, redis, fs, ... 
 
 ## Features
 
