@@ -1,11 +1,11 @@
 import { defineNuxtConfig } from 'nuxt/config'
-import MyModule from '../src/module'
+import NuxtSession from '../src/module'
 
 export default defineNuxtConfig({
   modules: [
-    MyModule
+    NuxtSession
   ],
-  myModule: {
+  NuxtSession: {
     addPlugin: true
   }
 })
