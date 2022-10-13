@@ -34,9 +34,9 @@ Nuxt session middleware to persist data across multiple requests, supports many 
     }
     ```
 
-Done! You can now access the session in your backend at `event.context.session`! All modifications to it will automatically be stored. Here's an endpoint that persists a counter per user:
+All modifications of ``event.context.session` will automatically be stored. [Here's an endpoint that persists a counter per user](playground/server/api/count.get.ts):
 ```ts
-// File: `server/api/count.get.ts`
+// File: `playground/server/api/count.get.ts`
 export default defineEventHandler(async (event: CompatibilityEvent) => {
   // Get the current count or set to 0 if this is the first request
   const currentCount = event.context.session.count || 0

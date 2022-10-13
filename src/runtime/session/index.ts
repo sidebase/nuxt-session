@@ -24,7 +24,7 @@ const getEventSessionId = (event: H3Event) => parseCookies(event).sessionId
 const getEventSession = (event: H3Event) => event.context.session
 
 const newSession = async (event: H3Event) => {
-  // Cleanup old session data
+  // Cleanup old session data to avoid leaks
   const oldSessionId = getEventSessionId(event)
   if (oldSessionId) {
     dropStorageSession(oldSessionId)
