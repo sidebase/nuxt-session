@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1 (2022/10/13)
+
+- feat: add author, bugs and homepage urls to `package.json`
+
 ## 0.1.0 (2022/10/13)
 
 - feat: expand example, add screenshots and logos 
