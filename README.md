@@ -8,9 +8,11 @@ Nuxt session middleware to persist data across multiple requests, supports many 
 
 ## Features
 
-- ✔️ Persistent sessions
-- ✔️ Configurable session duration, default: 10 minutes
-- ✔️ Cookie-based storage
+- ✔️ Persistent sessions across requests
+- ✔️ Storage via [unjs/unstorage](https://github.com/unjs/unstorage) - use memory, redis, fs, cloudflare-kv, ... to store your session data
+- ✔️ Configurable session duration
+- ✔️ Automatic session storage cleanup on expiry
+- ✔️ Transport method: Cookies 
 
 ## Usage
 

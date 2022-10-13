@@ -2,7 +2,7 @@ import { H3Event, defineEventHandler, setCookie, parseCookies } from 'h3'
 import { nanoid } from 'nanoid'
 import dayjs from 'dayjs'
 import useConfig from './config'
-import { getStorageSession, setStorageSession } from './storage'
+import { dropStorageSession, getStorageSession, setStorageSession } from './storage'
 
 const safeSetCookie = (event: H3Event, name: string, value: string) => setCookie(event, name, value, {
   // Max age of cookie in seconds
@@ -24,9 +24,15 @@ const getEventSessionId = (event: H3Event) => parseCookies(event).sessionId
 const getEventSession = (event: H3Event) => event.context.session
 
 const newSession = async (event: H3Event) => {
+  // Cleanup old session data
+  const oldSessionId = getEventSessionId(event)
+  if (oldSessionId) {
+    dropStorageSession(oldSessionId)
+  }
+
   const sessionId = nanoid(useConfig().sessionIdLength)
 
-  // Set cookie
+  // (Re-)Set cookie
   safeSetCookie(event, 'sessionId', sessionId)
 
   // Store session data in storage
@@ -59,7 +65,7 @@ function isSession (shape: unknown): shape is Session {
 }
 
 const ensureSession = async (event: H3Event) => {
-  let session: null | Session = await getSession(event)
+  let session = await getSession(event)
   if (!session) {
     session = await newSession(event)
   }
