@@ -29,7 +29,6 @@
   },
   "dependencies": {
     "@nuxt/kit": "^3.0.0-rc.11",
-    "@sidebase/nuxt-session": "^0.0.1",
     "dayjs": "^1.11.5",
     "h3": "^0.7.21",
     "unstorage": "^0.5.6"
