@@ -1,5 +1,5 @@
 export default defineEventHandler((event) => {
   event.context.session = {}
 
-  return 'session deleted'
+  return `session deleted at ${new Date()}`
 })

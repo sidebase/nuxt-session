@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { useFetch } from '#app';
+import { ref } from 'vue';
 
 // Note: `server: false` as the initial server-side request would not have any cookies attached, so the session could not be restored there. With `server: false`
 // nuxt 3 triggers the request on the client side, so that the cookies will be there, see https://v3.nuxtjs.org/api/composables/use-fetch#params
 const { data: count, refresh: refreshCount } = await useFetch('/api/count', { server: false })
 const { data: session, refresh: refreshSession } = await useFetch('/api/session', { server: false })
 
-const { data: deleteResponse, refresh: deleteSession } = await useFetch('/api/session', { immediate: false, method: 'DELETE' })
+const { data: deleteResponse, refresh: deleteSession } = await useFetch('/api/session', { method: 'DELETE' })
 </script>
 
 <template>

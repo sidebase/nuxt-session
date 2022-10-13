@@ -1,3 +1,5 @@
+![nuxt session logo](./.github/session.png)
+
 # nuxt-session
 
 [![Follow us on Twitter](https://badgen.net/badge/icon/twitter?icon=twitter&label)](https://twitter.com/sidebase_io)
@@ -13,6 +15,8 @@ Nuxt session middleware to persist data across multiple requests, supports many 
 - ✔️ Configurable session duration
 - ✔️ Automatic session storage cleanup on expiry
 - ✔️ Transport method: Cookies 
+
+Use the module-playground (see playground below) to play around with the module.
 
 ## Usage
 
@@ -55,9 +59,29 @@ To use the session on the client side (i.e., in your client app) you could creat
 export default defineEventHandler((event: CompatibilityEvent) => event.context.session)
 ```
 
+## Playground
+
+An example page making use of `nuxt-session`:
+![nuxt session counter example](./.github/session-example.png)
+
+See the playground to interactively use this:
+```sh
+> git clone https://github.com/sidebase/nuxt-session
+
+> cd nuxt-session
+
+> npm i
+
+> npm run dev:prepare
+
+> npm run dev
+
+# -> open http://localhost:3000
+```
+
 ## Development
 
 - Run `npm run dev:prepare` to generate type stubs.
 - Use `npm run dev` to start [playground](./playground) in development mode.
 - Run `npm run lint` to run eslint
-- Run `npm run lint` to run typescheck via tsc
+- Run `npm run type` to run typescheck via tsc
