@@ -2,9 +2,12 @@
 
 # nuxt-session
 
+[![npm version][npm-version-src]][npm-version-href]
+[![npm downloads][npm-downloads-src]][npm-downloads-href]
+[![GitHub stars](https://badgen.net/github/stars/sidebase/nuxt-session)](https://GitHub.com/sidebase/nuxt-session/)
+[![License][license-src]][license-href]
 [![Follow us on Twitter](https://badgen.net/badge/icon/twitter?icon=twitter&label)](https://twitter.com/sidebase_io)
 [![Join our Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/9MUHR8WT9B)
-[![GitHub stars](https://badgen.net/github/stars/sidebase/nuxt-session)](https://GitHub.com/sidebase/nuxt-session/)
 
 Nuxt session middleware to persist data across multiple requests, supports many backends via unjs/unstorage: memory, redis, fs, ... 
 
@@ -85,3 +88,15 @@ See the playground to interactively use this:
 - Use `npm run dev` to start [playground](./playground) in development mode.
 - Run `npm run lint` to run eslint
 - Run `npm run type` to run typescheck via tsc
+
+
+
+<!-- Badges -->
+[npm-version-src]: https://img.shields.io/npm/v/@sidebase/nuxt-session/latest.svg
+[npm-version-href]: https://npmjs.com/package/@sidebase/nuxt-session
+
+[npm-downloads-src]: https://img.shields.io/npm/dt/@sidebase/nuxt-session.svg
+[npm-downloads-href]: https://npmjs.com/package/@sidebase/nuxt-session
+
+[license-src]: https://img.shields.io/npm/l/@sidebase/nuxt-session.svg
+[license-href]: https://npmjs.com/package/@sidebase/nuxt-session
