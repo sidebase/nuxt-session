@@ -41,7 +41,7 @@ Use the module-playground (see playground below) to play around with the module.
     }
     ```
 
-All modifications of ``event.context.session` will automatically be stored. [Here's an endpoint that persists a counter per user](playground/server/api/count.get.ts):
+All modifications of `event.context.session` will automatically be stored. [Here's an endpoint that persists a counter per user](playground/server/api/count.get.ts):
 ```ts
 // File: `playground/server/api/count.get.ts`
 export default defineEventHandler(async (event: CompatibilityEvent) => {
