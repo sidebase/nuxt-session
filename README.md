@@ -1,4 +1,4 @@
-![logo of nuxt session](https://github.com/sidebase/nuxt-session/.github/session.png)
+![logo of nuxt session](./.github/session.png)
 
 # nuxt-session
 
@@ -65,7 +65,7 @@ export default defineEventHandler((event: CompatibilityEvent) => event.context.s
 ## Playground
 
 An example page making use of `nuxt-session`:
-![nuxt session counter example](https://github.com/sidebase/nuxt-session/.github/session-example.png)
+![nuxt session counter example](./.github/session-example.png)
 
 See the playground to interactively use this:
 ```sh
@@ -85,7 +85,7 @@ See the playground to interactively use this:
 ## Development
 
 - Run `npm run dev:prepare` to generate type stubs.
-- Use `npm run dev` to start [the playground](https://github.com/sidebase/nuxt-session/playground) in development mode.
+- Use `npm run dev` to start [the module playground](./playground) in development mode.
 - Run `npm run lint` to run eslint
 - Run `npm run type` to run typescheck via tsc
 
