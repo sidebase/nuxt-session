@@ -87,7 +87,7 @@ export default defineNuxtModule<ModuleOptions>({
     nuxt.options.runtimeConfig.session = moduleOptions
 
     // Setup handler
-    const handler = resolve(runtimeDir, 'session')
+    const handler = resolve(runtimeDir, 'server/middleware/session')
     const serverHandler = {
       middleware: true,
       handler

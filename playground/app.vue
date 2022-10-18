@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import { useFetch } from '#app';
-import { ref } from 'vue';
+import { useFetch } from '#app'
 
 // Note: `server: false` as the initial server-side request would not have any cookies attached, so the session could not be restored there. With `server: false`
 // nuxt 3 triggers the request on the client side, so that the cookies will be there, see https://v3.nuxtjs.org/api/composables/use-fetch#params
