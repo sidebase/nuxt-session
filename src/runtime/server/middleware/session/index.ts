@@ -2,7 +2,7 @@ import { H3Event, defineEventHandler, setCookie, parseCookies, deleteCookie } fr
 import { nanoid } from 'nanoid'
 import dayjs from 'dayjs'
 import type { SameSiteOptions } from '../../../../module'
-import useConfig from './config'
+import useConfig from '../../../config'
 import { dropStorageSession, getStorageSession, setStorageSession } from './storage'
 
 const SESSION_COOKIE_NAME = 'sessionId'
@@ -17,9 +17,10 @@ const safeSetCookie = (event: H3Event, name: string, value: string) => setCookie
   sameSite: useConfig().sessionCookieSameSite as SameSiteOptions
 })
 
-declare interface Session {
+export declare interface Session {
   id: string
   createdAt: Date
+  [key: string]: any
 }
 
 /**

@@ -3,7 +3,7 @@ import { fileURLToPath } from 'url'
 import { addServerHandler, defineNuxtModule, useLogger } from '@nuxt/kit'
 import { CreateStorageOptions } from 'unstorage'
 
-type SameSiteOptions = 'lax' | 'strict' | 'none'
+export type SameSiteOptions = 'lax' | 'strict' | 'none'
 type SupportedSessionApiMethods = 'patch' | 'delete' | 'get' | 'post'
 export interface ModuleOptions {
   /**

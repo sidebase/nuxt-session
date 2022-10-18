@@ -1,5 +1,5 @@
 import { createStorage, prefixStorage, StorageValue } from 'unstorage'
-import useConfig from './config'
+import useConfig from '../../../config'
 
 const storage = prefixStorage(createStorage(useConfig().sessionStorageOptions), useConfig().sessionStorePrefix)
 
