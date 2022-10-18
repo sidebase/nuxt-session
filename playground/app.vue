@@ -14,12 +14,13 @@ const { data: deleteResponse, refresh: deleteSession } = await useFetch('/api/se
     <div>
       <h2>Current session</h2>
       <p>The full session object of the current visitor. Click the button below to refresh the session object to see if anything has changed. Something will change on session expiry (a new id + createdAt will be set) or when the count-endpoint was already requested, a new key `count` should appear.</p>
+      <p>The endpoint for this request exists out of the box and is available at `GET /api/session` (configurable via the module config)</p>
       <pre>{{ session }}</pre>
       <button @click="refreshSession">
         Refresh session!
       </button>
     </div>
-    <hr/>
+    <hr>
     <div>
       <h2>Current count</h2>
       <p>The amount of times the `/api/count` endpoint was hit by the current visitor. Click the button to trigger a new request to the count-endpoint and increase the count by 1. Clicking this button will not trigger a full refetch of the session-object above. Feel free to increase the count a couple of times and then refresh the session above afterwards to see that the count is stored as part of the same object (:</p>
@@ -28,10 +29,11 @@ const { data: deleteResponse, refresh: deleteSession } = await useFetch('/api/se
         Increase count!
       </button>
     </div>
-    <hr/>
+    <hr>
     <div>
       <h3>Reset the session</h3>
       <p>Deleting the current session will result in a new session being assinged. The `count` should be reset, the `id` should change and the `createdAt` should update</p>
+      <p>The endpoint for this request exists out of the box and is available at `DELETE /api/session` (configurable via the module config)</p>
       <pre>{{ deleteResponse || 'Delete not triggered yet' }}</pre>
       <button @click="deleteSession">
         Delete session!
