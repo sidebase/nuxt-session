@@ -14,8 +14,12 @@ Nuxt session middleware to persist data across multiple requests, supports many 
 ## Features
 
 - ✔️ Persistent sessions across requests
+- ✔️ Configurable session endpoints out of the box:
+    - `GET /api/session`: Get the current session
+    - `DELETE /api/session`: Delete the current session
+    - `POST /api/session`: Overwrite the current session data 
+    - `PATCH /api/session`: Add to the current session data
 - ✔️ Storage via [unjs/unstorage](https://github.com/unjs/unstorage) - use memory, redis, fs, cloudflare-kv, ... to store your session data
-- ✔️ Configurable session duration
 - ✔️ Automatic session storage cleanup on expiry
 - ✔️ Transport method: Cookies 
 
@@ -33,13 +37,32 @@ Use the module-playground (see playground below) to play around with the module.
       modules: ['@sidebase/nuxt-session'],
     })
     ```
-3. Each request will now have a session at `event.context.session` that looks like:
-    ```ts
-    {
-      id: 'TLyEy2Mav2G_sawgek7fqqj6EaWrO9LDAfLjhjHRKbE6M-_nGhT1iK7sTwqZ-xoT',
-      createdAt: '2022-10-12T09:12:38.406Z'
-    }
-    ```
+3. Done! Each request will now have a session at `event.context.session`. Fetch it on the client side like:
+    - from any `.vue` file:
+        ```ts
+        const { data: session } = await useFetch('/api/session', { server: false })
+
+        // -> session.value contains the following after fetch:
+        // {
+        //  "id": "2W7WuCbAX0b4W_53ZeiFJ_3AW6lFzMF6eD_h_Y3s5l0oLNgvaIcBCWS2Mosfw-HE",
+        //  "createdAt": "2022-10-18T12:44:46.786Z"
+        // }
+        ```
+    - from the terminal:
+        ```sh
+        > curl localhost:3000/api/session -v
+
+        ...
+        # The cookie being set!
+        < set-cookie: sessionId=ijdGtxlo9BaXmeFZ9PqcbeGDKhr5R_VefJJYPDRK_Qn-ZECdJ1D1mF-NvRQ2KuWf; Max-Age=600; Path=/; HttpOnly; Secure; SameSite=Lax
+        ...
+
+        # The session object with id and creation time:
+        {
+          "id": "2W7WuCbAX0b4W_53ZeiFJ_3AW6lFzMF6eD_h_Y3s5l0oLNgvaIcBCWS2Mosfw-HE",
+          "createdAt": "2022-10-18T12:44:46.786Z"
+        }
+        ```
 
 All modifications of `event.context.session` will automatically be stored. [Here's an endpoint that persists a counter per user](https://github.com/sidebase/nuxt-session/playground/server/api/count.get.ts):
 ```ts
@@ -56,10 +79,7 @@ export default defineEventHandler(async (event: CompatibilityEvent) => {
 })
 ```
 
-To use the session on the client side (i.e., in your client app) you could create an endpoint that returns the session (or a part of it):
-```ts
-// File: `server/api/me.get.ts`
-export default defineEventHandler((event: CompatibilityEvent) => event.context.session)
+To use the session on the client side (i.e., in your client app) you can use the endpoints that are provided by this module out of the box!
 ```
 
 ## Playground
