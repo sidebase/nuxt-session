@@ -1,11 +1,11 @@
 import { H3Event, defineEventHandler, setCookie, parseCookies, deleteCookie } from 'h3'
 import { nanoid } from 'nanoid'
 import dayjs from 'dayjs'
+import type { SameSiteOptions } from '../../../../module'
 import useConfig from './config'
 import { dropStorageSession, getStorageSession, setStorageSession } from './storage'
 
 const SESSION_COOKIE_NAME = 'sessionId'
-
 const safeSetCookie = (event: H3Event, name: string, value: string) => setCookie(event, name, value, {
   // Max age of cookie in seconds
   maxAge: useConfig().sessionExpiryInSeconds,
@@ -14,7 +14,7 @@ const safeSetCookie = (event: H3Event, name: string, value: string) => setCookie
   // Only send cookie via HTTP requests, do not allow access of cookie from JS to mitigate XSS attacks
   httpOnly: true,
   // Do not send cookies on many cross-site requests to mitigates CSRF and cross-site attacks, see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite#lax
-  sameSite: useConfig().sessionCookieSameSite
+  sameSite: useConfig().sessionCookieSameSite as SameSiteOptions
 })
 
 declare interface Session {
