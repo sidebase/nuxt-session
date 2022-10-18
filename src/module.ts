@@ -4,7 +4,7 @@ import { addServerHandler, defineNuxtModule, useLogger } from '@nuxt/kit'
 import { CreateStorageOptions } from 'unstorage'
 
 export type SameSiteOptions = 'lax' | 'strict' | 'none'
-type SupportedSessionApiMethods = 'patch' | 'delete' | 'get' | 'post'
+export type SupportedSessionApiMethods = 'patch' | 'delete' | 'get' | 'post'
 export interface ModuleOptions {
   /**
    * Whether to enable the module

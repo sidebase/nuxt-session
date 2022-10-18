@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useFetch } from '#app'
 import { computed, ref } from 'vue'
-import useNuxtSession from './composables/useNuxtSession'
+
 const { session, refresh, reset, remove, update } = await useNuxtSession()
 
 // Counter demo
