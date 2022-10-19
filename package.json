@@ -29,16 +29,16 @@
     "build": "nuxi build"
   },
   "dependencies": {
-    "@nuxt/kit": "^3.0.0-rc.11",
+    "@nuxt/kit": "^3.0.0-rc.12",
     "dayjs": "^1.11.5",
-    "h3": "^0.7.21",
-    "unstorage": "^0.5.6"
+    "h3": "^0.8.5",
+    "unstorage": "^0.6.0"
   },
   "devDependencies": {
     "@nuxt/module-builder": "latest",
-    "@nuxt/schema": "^3.0.0-rc.11",
+    "@nuxt/schema": "^3.0.0-rc.12",
     "@nuxtjs/eslint-config-typescript": "latest",
     "eslint": "latest",
-    "nuxt": "^3.0.0-rc.11"
+    "nuxt": "^3.0.0-rc.12"
   }
 }
