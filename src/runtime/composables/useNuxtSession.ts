@@ -1,9 +1,9 @@
-import { useFetch } from '#app'
+import { useFetch, createError } from '#app'
 import { nanoid } from 'nanoid'
 import { Ref, ref } from 'vue'
 import type { SupportedSessionApiMethods } from '../../module'
 import type { Session } from '../server/middleware/session'
-import { useRuntimeConfig } from '#imports'
+import useConfig from '../config'
 
 type SessionData = Record<string, any>
 
@@ -20,14 +20,14 @@ export default async (options: ComposableOptions = {
   const session: Ref<Session | null> = ref(null)
 
   const _performSessionRequest = (method: SupportedSessionApiMethods, body?: SessionData) => {
-    const config = useRuntimeConfig().session
-    if (!config.apiMethods.includes(method)) {
-      const error = `Cannot "${method}" session data as endpoint is not enabled. Configure this via the "nuxtSession.apiEnabled" and "nuxtSession.apiMethods" configuration options.`
-      throw new Error(error)
+    const config = useConfig()
+    if (!config.api.enabled || !config.api.methods.includes(method)) {
+      const message = `Cannot "${method}" session data as endpoint is not enabled. If you want to be able to "${method}" session data, you can configure this via the "session.api.enabled: boolean" and "session.api.methods: ('post' | 'get' | ...)[]" module configuration options.`
+      throw createError({ message, statusCode: 500 })
     }
 
     // Return the fetch so that it is executed in the component context + to allow further introspection by the user if desired
-    return useFetch(config.apiBasePath, {
+    return useFetch(config.api.basePath, {
       // Method must be capitalized for HTTP-request to work
       method: method.toUpperCase(),
       body,

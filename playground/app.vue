@@ -24,7 +24,7 @@ const value = ref('')
     <div>
       <h2>Current session</h2>
       <p>The full session object of the current visitor. Click the button below to refresh the session object to see if anything has changed. Something will change on session expiry (a new id + createdAt will be set) or when the count-endpoint was already requested, a new key `count` should appear.</p>
-      <p>The endpoint for this request exists out of the box and is available at `GET /api/session` (the path and enabled methods are configurable via the module config `apiBasePath` key)</p>
+      <p>The endpoint for this request exists out of the box and is available at `GET /api/session` (the path and enabled methods are configurable via the module config `api.basePath` key)</p>
       <pre>{{ session || 'no session exists, have you deleted it? Click refresh to get a new one!' }}</pre>
       <button @click="refresh">
         Refresh session!
@@ -37,7 +37,7 @@ const value = ref('')
       <p>Below both possible options are show-cased. One button triggers a request to the `/api/count` endpoint that increases the request count on the server side. The second button sends a JSON-payload to the nuxt-session API endpoint that allows arbitrary updating of session data with data sent from the client side.</p>
       <p>When you increase the count on the server-side, the session here will not change. You need to hit the `refresh` button above to see the changes! When we update it from the client-side using the nuxt-session composable `update` for it, we immeadiatly see the updates reflected, neat!</p>
       <p>NOTE: The server-side and client-side count update can collide with each other, e.g., if you update the count on the server side a couple of times and then update the count from the client side without refreshing the session. As the client only has the "old" count, it will send a different count than the count that the server currently knows and thus overwrite it.</p>
-      <p>NOTE: Exposing session manipulation to the client-side can be dangerous, depending on your use case. It can lead to flawed data on accident or even on purpose by an attacker. You can configure what endpoints are exposed by nuxt-session using the `apiEnabled` config flag. You can use the `apiMethods` array to more narrowly define which methods you want to support.</p>
+      <p>NOTE: Exposing session manipulation to the client-side can be dangerous, depending on your use case. It can lead to flawed data on accident or even on purpose by an attacker. You can configure what endpoints are exposed by nuxt-session using the `api.enabled` config flag. You can use the `api.methods` module config array to more narrowly define which methods you want to support.</p>
       <pre>{{ currentCount || 'no count sent yet' }}</pre>
       <button @click="increaseCountOnServer">
         Increase server-side!

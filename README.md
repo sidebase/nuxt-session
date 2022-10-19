@@ -9,7 +9,7 @@
 [![Follow us on Twitter](https://badgen.net/badge/icon/twitter?icon=twitter&label)](https://twitter.com/sidebase_io)
 [![Join our Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/9MUHR8WT9B)
 
-Nuxt session middleware to get a persistent session per app user, e.g., to store data across multiple requests. This nuxt session module provides the `useNuxtSession()` composable out of the box and set's up API endpoints to interact with your session to make working with sessions feel like a breeze.
+> Nuxt session middleware to get a persistent session per app user, e.g., to store data across multiple requests. The nuxt session module provides the `useNuxtSession()` composable out of the box and sets up API endpoints to interact with your session to make working with sessions feel like a breeze.
 
 ## Quick start
 
@@ -93,9 +93,13 @@ The `nuxt-session` maintains sessions: Persistent data across different requests
 
 We call this "stay" that lasts as long as the above criteria are met a session.
 
-Below we discuss what session data is, how to access it on the server-side (in your backend), how to access it on the client side (in your frontend) and how to configure the server-side storage that your nuxt-app uses to store sessions and their data.
-
-After discussing session data, there's a caveat-section about security.
+Below we describe:
+1. [Session data](#session-data)
+    - [Client-side access](#client-side-access)
+    - [Server-side access](#server-side-access)
+2. [How to configure session-storage](#storage-backends)
+3. [Configuration](#configuration)
+4. [Security](#security)
 
 ### Session Data
 
@@ -139,11 +143,22 @@ await overwrite({ "test": "This replaces all current data of the session without
 
 Per default all of the above is enabled. Read on if you want to learn how to configure and disable some of the above functionalities and their respective endpoints, e.g., to secure your application.
 
-You can configure what endpoints and utilities `nuxt-session` adds for client-side use using the module configuration. The API is fully enabled per default. If you want to turn off the whole `nuxt-session` API you can set `nuxtSession: { apiEnabled: false }` in the module config in your `nuxt.config.ts`. If you want to keep the api enabled but allow just certain operation by the client-side, you can restrict the HTTP methods that should be allowed. E.g., `nuxtSession: { apiMethods: ['get'] }` would:
+You can configure what endpoints and utilities `nuxt-session` adds for client-side use using the module configuration. The API is fully enabled per default. If you want to turn off the whole `nuxt-session` API you can set `session: { api: { enabled: false } }` in the module config in your `nuxt.config.ts`. If you want to keep the api enabled but allow just certain operation by the client-side, you can restrict the HTTP methods that should be allowed. E.g., `session: { api: { methods: ['get'] } }` would:
 - add only one endpoint that allows reading the current session data (per default: `GET /api/session`)
 - enable only the `session` and `refresh` properties of the `useNuxtSession` composable
 
-After this, calling the `reset()` or `update()` functions from above would result in an error that the methods are not supported and the api endpoints would not be added to your nuxt-app. So even if somebody tried to manually access the endpoints they would not succeed.
+After this, calling the `reset()` or `update()` functions from above would result in an error that the methods are not supported and the api endpoints would not be added to your nuxt-app. This way:
+- you cannot accidentaly call a composable-method during development and it later does not work in production,
+- if somebody tried to manually access the endpoints they would not succeed as the endpoint does not exist
+
+##### Advanced Client-Side Usage
+
+The methods that `nuxt-session` expose are `useFetch` calls under the hood. For advanced use, debugging and error handling their result is directly exposed. So when you use one of them, you can destructure just like with [nuxt useFetch](https://v3.nuxtjs.org/api/composables/use-fetch#usefetch):
+```ts
+const { data, pending, error, refresh } = await update({ "hello": "session", "test": 1234, "userLikesCookies": true })
+
+// ... do something with the above reactive useFetch properties
+```
 
 #### Server Side Access
 
@@ -178,9 +193,39 @@ In theory you can manipulate this data on the server side if you want to. If you
 
 `nuxt-session` allows you to use different storage backends. A storage backend is something like your server memory, a redis database, the file-system of your server, ... Supporting these backend is possible by using [unjs/unstorage](https://github.com/unjs/unstorage) for storage management. This library connects to the different backends it supports with a unified interface. 
 
-You can configure the storage backend using the `nuxtSession.sessionStorageOptions` configuration option of the `nuxt-session` module. By default `memory` is used to store the sessions. This has some advantages like speed and easy setup, but some disadvantages like missing persistency (if your server crashes, the sessions are gone!) and possible exploits like setting millions of sessions trying to exhaust your server-memory or saving large amounts of data into the session that your server cannot handle.
+You can configure the storage backend using the `session.session.storageOptions` configuration option of the `nuxt-session` module. By default `memory` is used to store the sessions. This has some advantages like speed and easy setup, but some disadvantages like missing persistency (if your server crashes, the sessions are gone!) and possible exploits like setting millions of sessions trying to exhaust your server-memory or saving large amounts of data into the session that your server cannot handle.
 
 Check out here what storage backends are supported and how to configure them: https://github.com/unjs/unstorage#drivers
+
+### Configuration
+
+Here's what the full _default_ module configuration looks like:
+```ts
+{
+  // Module is enabled
+  isEnabled: true,
+  session: {
+    // Sessions expire after 600 seconds = 10 minutes
+    expiryInSeconds: 60 * 10,
+    // Session ids are 64 characters long
+    idLength: 64,
+    // All session data is stored in a "sub-storage" that uses the `sessions` prefix
+    storePrefix: 'sessions',
+    // The session cookie same site policy is `lax`
+    cookieSameSite: 'lax',
+    // In-memory storage is used (these are `unjs/unstorage` options)
+    storageOptions: {}
+  },
+  api: {
+    // The API is enabled
+    enabled: true,
+    // `PATCH, GET, POST, DELETE /api/session` HTTP requests are possible
+    methods: ['patch', 'get', 'post', 'delete'],
+    // The sessions endpoints are mounted at `/api/session`
+    basePath: '/api/session'
+  }
+}
+```
 
 ### Security 
 
@@ -192,7 +237,7 @@ Without further ado, here's some attack cases you can consider and take action a
 1. sending arbitrary data
     - problems: Denial-of-Service by server-ressource exhaustion (bandwidth, cpu, memory), arbitrary code execution (if you parse the data), ...
     - possible mitigations:
-        - disable api-access to session data (`apiEnabled: false`) or restrict it to only reading (`apiMethods: ['get']`)
+        - disable api-access to session data (`api.enabled: false`) or restrict it to only reading (`api: { methods: ['get'] }`)
         - parse & validate data securely on the server side before storing it into the session, e.g., using [zod](https://github.com/colinhacks/zod)
         - we at some point implement some settings for this (e.g., max session amount, size, ...)
 2. creation arbitrarily many sessions
@@ -203,7 +248,7 @@ Without further ado, here's some attack cases you can consider and take action a
 3. guessing correct session ids
     - problems: session data can leak
     - possible mitigations: 
-        - disable reading of data on the client side by disabling the api or setting `apiMethods: []`
+        - disable reading of data on the client side by disabling the api or setting `api: { methods: [] }`
         - increase the default sessionId length (although with `64` characters it already is quite long, in 2022)
 4. stealing session id(s) of client(s)
     - problem: session data can leak

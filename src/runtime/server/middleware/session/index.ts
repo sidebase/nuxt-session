@@ -8,13 +8,13 @@ import { dropStorageSession, getStorageSession, setStorageSession } from './stor
 const SESSION_COOKIE_NAME = 'sessionId'
 const safeSetCookie = (event: H3Event, name: string, value: string) => setCookie(event, name, value, {
   // Max age of cookie in seconds
-  maxAge: useConfig().sessionExpiryInSeconds,
+  maxAge: useConfig().session.expiryInSeconds,
   // Only send cookie via HTTPs to mitigate man-in-the-middle attacks
   secure: true,
   // Only send cookie via HTTP requests, do not allow access of cookie from JS to mitigate XSS attacks
   httpOnly: true,
   // Do not send cookies on many cross-site requests to mitigates CSRF and cross-site attacks, see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite#lax
-  sameSite: useConfig().sessionCookieSameSite as SameSiteOptions
+  sameSite: useConfig().session.cookieSameSite as SameSiteOptions
 })
 
 export declare interface Session {
@@ -58,7 +58,7 @@ const newSession = async (event: H3Event) => {
   await deleteSession(event)
 
   // (Re-)Set cookie
-  const sessionId = nanoid(useConfig().sessionIdLength)
+  const sessionId = nanoid(useConfig().session.idLength)
   safeSetCookie(event, SESSION_COOKIE_NAME, sessionId)
 
   // Store session data in storage
@@ -82,10 +82,10 @@ const getSession = async (event: H3Event): Promise<null | Session> => {
   }
 
   // 3. Is the session not expired?
-  const sessionExpiryInSeconds = useConfig().sessionExpiryInSeconds
+  const sessionExpiryInSeconds = useConfig().session.expiryInSeconds
   if (sessionExpiryInSeconds !== null) {
     const now = dayjs()
-    if (now.diff(dayjs(session.createdAt), 'seconds') > useConfig().sessionExpiryInSeconds) {
+    if (now.diff(dayjs(session.createdAt), 'seconds') > sessionExpiryInSeconds) {
       return null
     }
   }
