@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  build:
+  test:
     runs-on: ubuntu-latest
 
     steps:
@@ -17,10 +17,12 @@ jobs:
         with:
           node-version: 16.14.2
 
+      # Install locked dependencies and prepare types
       - run: npm ci
+      - run: npm run dev:prepare
 
       # Check if build and package artifacts can still be generated
-      - run: npm run build
+      - run: npm run prepack
 
       # Check linting and typing
       - run: npm run lint
