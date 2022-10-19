@@ -21,7 +21,6 @@ jobs:
 
       # Check if build and package artifacts can still be generated
       - run: npm run build
-      - run: npm run prepack
 
       # Check linting and typing
       - run: npm run lint
