@@ -84,7 +84,7 @@ See the playground to interactively use this:
 
 ## Documentation
 
-First of all: Try out the playground if you want to test-drive this package and learn how to use it. You can also have a look [at the code](./playground/app.vue) to see how everything you see there is implemented under the hood.
+First of all: Try out the playground if you want to test-drive this package and learn how to use it. You can also have a look [at the playground code](./playground/app.vue) to see how to use `nuxt-session` in your app.
 
 The `nuxt-session` maintains sessions: Persistent data across different requests by the same client (or: "user"). To maintain these sessions, `nuxt-session` sets a cookie with a unique client id for the currently connected client. Then after the cookie is set, the client will be uniquely identifiable by the server as long as:
 - the client sends this cookie on all subsequent requests,

@@ -38,7 +38,7 @@ export default async (options: ComposableOptions = {
       // Never cache
       key: nanoid(),
 
-      // Overwrite the `session`-ref if desired
+      // Overwrite the `session`-ref before returning the value for the end-callee
       onResponse ({ response }) {
         const data = response._data
 

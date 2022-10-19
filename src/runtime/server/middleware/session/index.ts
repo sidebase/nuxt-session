@@ -28,7 +28,7 @@ export declare interface Session {
  *
  * The session id may be set only on the cookie or only on the context or both. This is because when the
  * session was just created, the session cookie is not yet set on the request (only on the response!). To
- * still function in this scenario the session-middleware sets the cookie on the response and on the `event.context`.
+ * still function in this scenario the session-middleware sets the cookie on the response and the `sessionId` on the `event.context`.
  *
  * This method extracts the session id and ensures that if the id on cookie and context match if both exist.
  * @param event H3Event Event passing through middleware
