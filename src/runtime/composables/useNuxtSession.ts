@@ -3,7 +3,7 @@ import { nanoid } from 'nanoid'
 import { Ref, ref } from 'vue'
 import type { SupportedSessionApiMethods } from '../../module'
 import type { Session } from '../server/middleware/session'
-import useConfig from '../config'
+import { useRuntimeConfig } from '#imports'
 
 type SessionData = Record<string, any>
 
@@ -16,11 +16,12 @@ export default async (options: ComposableOptions = {
 }) => {
   /**
    * The currently active session associated with the current client
+   * @type Ref<Session | null>
    */
   const session: Ref<Session | null> = ref(null)
 
   const _performSessionRequest = (method: SupportedSessionApiMethods, body?: SessionData) => {
-    const config = useConfig()
+    const config = useRuntimeConfig().public.session
     if (!config.api.isEnabled || !config.api.methods.includes(method)) {
       const message = `Cannot "${method}" session data as endpoint is not enabled. If you want to be able to "${method}" session data, you can configure this via the "session.api.isEnabled: boolean" and "session.api.methods: ('post' | 'get' | ...)[]" module configuration options.`
       throw createError({ message, statusCode: 500 })

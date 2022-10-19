@@ -2,19 +2,19 @@ import { H3Event, defineEventHandler, setCookie, parseCookies, deleteCookie } fr
 import { nanoid } from 'nanoid'
 import dayjs from 'dayjs'
 import type { SameSiteOptions } from '../../../../module'
-import useConfig from '../../../config'
 import { dropStorageSession, getStorageSession, setStorageSession } from './storage'
+import { useRuntimeConfig } from '#imports'
 
 const SESSION_COOKIE_NAME = 'sessionId'
 const safeSetCookie = (event: H3Event, name: string, value: string) => setCookie(event, name, value, {
   // Max age of cookie in seconds
-  maxAge: useConfig().session.expiryInSeconds,
+  maxAge: useRuntimeConfig().session.session.expiryInSeconds,
   // Only send cookie via HTTPs to mitigate man-in-the-middle attacks
   secure: true,
   // Only send cookie via HTTP requests, do not allow access of cookie from JS to mitigate XSS attacks
   httpOnly: true,
   // Do not send cookies on many cross-site requests to mitigates CSRF and cross-site attacks, see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite#lax
-  sameSite: useConfig().session.cookieSameSite as SameSiteOptions
+  sameSite: useRuntimeConfig().session.session.cookieSameSite as SameSiteOptions
 })
 
 export declare interface Session {
@@ -58,7 +58,7 @@ const newSession = async (event: H3Event) => {
   await deleteSession(event)
 
   // (Re-)Set cookie
-  const sessionId = nanoid(useConfig().session.idLength)
+  const sessionId = nanoid(useRuntimeConfig().session.session.idLength)
   safeSetCookie(event, SESSION_COOKIE_NAME, sessionId)
 
   // Store session data in storage
@@ -82,7 +82,7 @@ const getSession = async (event: H3Event): Promise<null | Session> => {
   }
 
   // 3. Is the session not expired?
-  const sessionExpiryInSeconds = useConfig().session.expiryInSeconds
+  const sessionExpiryInSeconds = useRuntimeConfig().session.session.expiryInSeconds
   if (sessionExpiryInSeconds !== null) {
     const now = dayjs()
     if (now.diff(dayjs(session.createdAt), 'seconds') > sessionExpiryInSeconds) {

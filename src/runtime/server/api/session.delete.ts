@@ -1,7 +1,7 @@
-import { defineEventHandler } from 'h3'
+import { eventHandler } from 'h3'
 import { deleteSession } from '../middleware/session'
 
-export default defineEventHandler(async (event) => {
+export default eventHandler(async (event) => {
   await deleteSession(event)
 
   return null
