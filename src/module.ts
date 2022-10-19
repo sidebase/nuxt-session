@@ -159,7 +159,7 @@ export default defineNuxtModule<ModuleOptions>({
     // 5. Register desired session API endpoints
     if (moduleOptions.api.isEnabled) {
       for (const apiMethod of moduleOptions.api.methods) {
-        const handler = resolve(runtimeDir, `server/api/session.${apiMethod}.ts`)
+        const handler = resolve(runtimeDir, `server/api/session.${apiMethod}`)
         addServerHandler({ handler, route: moduleOptions.api.basePath })
       }
       logger.info(`Session API "${moduleOptions.api.methods.join(', ')}" endpoints registered at "${moduleOptions.api.basePath}"`)

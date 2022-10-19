@@ -1,3 +1,3 @@
-import { defineEventHandler } from 'h3'
+import { eventHandler } from 'h3'
 
-export default defineEventHandler(event => event.context.session)
+export default eventHandler(event => event.context.session)
