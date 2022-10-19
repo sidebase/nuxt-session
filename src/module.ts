@@ -1,6 +1,6 @@
 import { resolve } from 'path'
 import { fileURLToPath } from 'url'
-import { addServerHandler, defineNuxtModule, useLogger } from '@nuxt/kit'
+import { addImportsDir, addServerHandler, defineNuxtModule, useLogger } from '@nuxt/kit'
 import { CreateStorageOptions } from 'unstorage'
 
 export type SameSiteOptions = 'lax' | 'strict' | 'none'
@@ -97,22 +97,37 @@ export default defineNuxtModule<ModuleOptions>({
     apiBasePath: '/api/session'
   },
   hooks: {},
-  setup (moduleOptions, nuxt) {
+  setup (options, nuxt) {
     const logger = useLogger(PACKAGE_NAME)
 
     // 1. Check if module should be enabled at all
-    if (!moduleOptions.isEnabled) {
+    if (!options.isEnabled) {
       logger.info(`Skipping ${PACKAGE_NAME} setup, as module is disabled`)
       return
     }
 
     logger.info('Setting up sessions...')
 
-    // 2. Set runtime config, get runtime directory
-    const runtimeDir = fileURLToPath(new URL('./runtime', import.meta.url))
+    // 2. Set public and private runtime configuration
+    const apiMethods = options.apiMethods.length > 0 ? options.apiMethods : ['patch', 'delete', 'get', 'post']
+    const moduleOptions = {
+      ...options,
+      apiMethods
+    }
     nuxt.options.runtimeConfig.session = moduleOptions
+    nuxt.options.runtimeConfig.public = {
+      ...(nuxt.options.runtimeConfig.public || {}),
+      session: {
+        apiEnabled: moduleOptions.apiEnabled,
+        apiMethods,
+        apiBasePath: moduleOptions.apiBasePath
+      }
+    }
 
-    // 3. Setup middleware, use `.unshift` to ensure (reasonably well) that the session middleware is first
+    // 3. Locate runtime directory and transpile module
+    const runtimeDir = fileURLToPath(new URL('./runtime', import.meta.url))
+
+    // 4. Setup middleware, use `.unshift` to ensure (reasonably well) that the session middleware is first
     const handler = resolve(runtimeDir, 'server/middleware/session')
     const serverHandler = {
       middleware: true,
@@ -120,9 +135,8 @@ export default defineNuxtModule<ModuleOptions>({
     }
     nuxt.options.serverHandlers.unshift(serverHandler)
 
-    // 4. Register desired session API endpoints
+    // 5. Register desired session API endpoints
     if (moduleOptions.apiEnabled) {
-      const apiMethods = moduleOptions.apiMethods.length > 0 ? moduleOptions.apiMethods : ['patch', 'delete', 'get', 'post']
       for (const apiMethod of apiMethods) {
         const handler = resolve(runtimeDir, `server/api/session.${apiMethod}.ts`)
         addServerHandler({ handler, route: moduleOptions.apiBasePath })
@@ -131,6 +145,10 @@ export default defineNuxtModule<ModuleOptions>({
     } else {
       logger.info('Session API disabled')
     }
+
+    // 6. Add nuxt-session composables
+    const composables = resolve(runtimeDir, 'composables')
+    addImportsDir(composables)
 
     logger.success('Session setup complete')
   }
