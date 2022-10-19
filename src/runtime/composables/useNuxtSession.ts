@@ -21,8 +21,8 @@ export default async (options: ComposableOptions = {
 
   const _performSessionRequest = (method: SupportedSessionApiMethods, body?: SessionData) => {
     const config = useConfig()
-    if (!config.api.enabled || !config.api.methods.includes(method)) {
-      const message = `Cannot "${method}" session data as endpoint is not enabled. If you want to be able to "${method}" session data, you can configure this via the "session.api.enabled: boolean" and "session.api.methods: ('post' | 'get' | ...)[]" module configuration options.`
+    if (!config.api.isEnabled || !config.api.methods.includes(method)) {
+      const message = `Cannot "${method}" session data as endpoint is not enabled. If you want to be able to "${method}" session data, you can configure this via the "session.api.isEnabled: boolean" and "session.api.methods: ('post' | 'get' | ...)[]" module configuration options.`
       throw createError({ message, statusCode: 500 })
     }
 

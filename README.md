@@ -143,13 +143,15 @@ await overwrite({ "test": "This replaces all current data of the session without
 
 Per default all of the above is enabled. Read on if you want to learn how to configure and disable some of the above functionalities and their respective endpoints, e.g., to secure your application.
 
-You can configure what endpoints and utilities `nuxt-session` adds for client-side use using the module configuration. The API is fully enabled per default. If you want to turn off the whole `nuxt-session` API you can set `session: { api: { enabled: false } }` in the module config in your `nuxt.config.ts`. If you want to keep the api enabled but allow just certain operation by the client-side, you can restrict the HTTP methods that should be allowed. E.g., `session: { api: { methods: ['get'] } }` would:
+You can configure what endpoints and utilities `nuxt-session` adds for client-side use using the module configuration. The API is fully enabled per default. If you want to turn off the whole `nuxt-session` API you can set `session: { api: { isEnabled: false } }` in the module config in your `nuxt.config.ts`. If you want to keep the api enabled but allow just certain operation by the client-side, you can restrict the HTTP methods that should be allowed. E.g., `session: { api: { methods: ['get'] } }` would:
 - add only one endpoint that allows reading the current session data (per default: `GET /api/session`)
 - enable only the `session` and `refresh` properties of the `useNuxtSession` composable
 
 After this, calling the `reset()` or `update()` functions from above would result in an error that the methods are not supported and the api endpoints would not be added to your nuxt-app. This way:
 - you cannot accidentaly call a composable-method during development and it later does not work in production,
 - if somebody tried to manually access the endpoints they would not succeed as the endpoint does not exist
+
+For all configuration options check out [the configuration section](#configuration).
 
 ##### Advanced Client-Side Usage
 
@@ -218,7 +220,7 @@ Here's what the full _default_ module configuration looks like:
   },
   api: {
     // The API is enabled
-    enabled: true,
+    isEnabled: true,
     // `PATCH, GET, POST, DELETE /api/session` HTTP requests are possible
     methods: ['patch', 'get', 'post', 'delete'],
     // The sessions endpoints are mounted at `/api/session`
@@ -237,7 +239,7 @@ Without further ado, here's some attack cases you can consider and take action a
 1. sending arbitrary data
     - problems: Denial-of-Service by server-ressource exhaustion (bandwidth, cpu, memory), arbitrary code execution (if you parse the data), ...
     - possible mitigations:
-        - disable api-access to session data (`api.enabled: false`) or restrict it to only reading (`api: { methods: ['get'] }`)
+        - disable api-access to session data (`api.isEnabled: false`) or restrict it to only reading (`api: { methods: ['get'] }`)
         - parse & validate data securely on the server side before storing it into the session, e.g., using [zod](https://github.com/colinhacks/zod)
         - we at some point implement some settings for this (e.g., max session amount, size, ...)
 2. creation arbitrarily many sessions
@@ -253,7 +255,7 @@ Without further ado, here's some attack cases you can consider and take action a
 4. stealing session id(s) of client(s)
     - problem: session data can leak
     - possible mitigations:
-        - increase cookie protection, e.g., by setting `sessionCookieSameSite: 'stric'` (default: `lax`)
+        - increase cookie protection, e.g., by setting `session.cookieSameSite: 'stric'` (default: `lax`)
         - use very short-lived sessions
         - don't allow session renewal
 

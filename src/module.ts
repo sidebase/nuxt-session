@@ -54,10 +54,10 @@ declare interface ApiOptions {
    * @example false
    * @type boolean
    */
-   enabled: boolean
+   isEnabled: boolean
    /**
     * Configure which session API methods are enabled. All api methods are enabled by default. Restricting the enabled methods can be useful if you want to allow the client to read session-data but not modify it. Passing
-    * an empty array will result in all API methods being registered. Disable the api via the `api.enabled` option.
+    * an empty array will result in all API methods being registered. Disable the api via the `api.isEnabled` option.
     * @default []
     * @example ['get']
     * @type SupportedSessionApiMethods[]
@@ -112,7 +112,7 @@ export default defineNuxtModule<ModuleOptions>({
       storageOptions: {}
     },
     api: {
-      enabled: true,
+      isEnabled: true,
       methods: [],
       basePath: '/api/session'
     }
@@ -157,7 +157,7 @@ export default defineNuxtModule<ModuleOptions>({
     nuxt.options.serverHandlers.unshift(serverHandler)
 
     // 5. Register desired session API endpoints
-    if (moduleOptions.api.enabled) {
+    if (moduleOptions.api.isEnabled) {
       for (const apiMethod of moduleOptions.api.methods) {
         const handler = resolve(runtimeDir, `server/api/session.${apiMethod}.ts`)
         addServerHandler({ handler, route: moduleOptions.api.basePath })
