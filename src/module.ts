@@ -2,6 +2,7 @@ import { resolve } from 'path'
 import { fileURLToPath } from 'url'
 import { addImportsDir, addServerHandler, defineNuxtModule, useLogger } from '@nuxt/kit'
 import { CreateStorageOptions } from 'unstorage'
+import { defu } from 'defu'
 
 export type SameSiteOptions = 'lax' | 'strict' | 'none'
 export type SupportedSessionApiMethods = 'patch' | 'delete' | 'get' | 'post'
@@ -84,15 +85,31 @@ export interface ModuleOptions {
    * Configure session-behvaior
    * @type SessionOptions
    */
-  session: SessionOptions
+  session: Partial<SessionOptions>
   /**
    * Configure session-api and composable-behavior
    * @type ApiOptions
    */
-  api: ApiOptions
+  api: Partial<ApiOptions>
 }
 
 const PACKAGE_NAME = 'nuxt-session'
+
+const defaults: ModuleOptions = {
+  isEnabled: true,
+  session: {
+    expiryInSeconds: 60 * 10,
+    idLength: 64,
+    storePrefix: 'sessions',
+    cookieSameSite: 'lax',
+    storageOptions: {}
+  },
+  api: {
+    isEnabled: true,
+    methods: [],
+    basePath: '/api/session'
+  }
+}
 
 export default defineNuxtModule<ModuleOptions>({
   meta: {
@@ -102,27 +119,13 @@ export default defineNuxtModule<ModuleOptions>({
       bridge: false
     }
   },
-  defaults: {
-    isEnabled: true,
-    session: {
-      expiryInSeconds: 60 * 10,
-      idLength: 64,
-      storePrefix: 'sessions',
-      cookieSameSite: 'lax',
-      storageOptions: {}
-    },
-    api: {
-      isEnabled: true,
-      methods: [],
-      basePath: '/api/session'
-    }
-  },
+  defaults,
   hooks: {},
-  setup (options, nuxt) {
+  setup (moduleOptions, nuxt) {
     const logger = useLogger(PACKAGE_NAME)
 
     // 1. Check if module should be enabled at all
-    if (!options.isEnabled) {
+    if (!moduleOptions.isEnabled) {
       logger.info(`Skipping ${PACKAGE_NAME} setup, as module is disabled`)
       return
     }
@@ -130,20 +133,10 @@ export default defineNuxtModule<ModuleOptions>({
     logger.info('Setting up sessions...')
 
     // 2. Set public and private runtime configuration
-    const moduleOptions = {
-      ...options,
-      api: {
-        ...options.api,
-        methods: options.api.methods.length > 0 ? options.api.methods : ['patch', 'delete', 'get', 'post']
-      }
-    }
-    nuxt.options.runtimeConfig.session = moduleOptions
-    nuxt.options.runtimeConfig.public = {
-      ...(nuxt.options.runtimeConfig.public || {}),
-      session: {
-        api: moduleOptions.api
-      }
-    }
+    const options = defu(moduleOptions, defaults)
+    options.api.methods = moduleOptions.api.methods.length > 0 ? moduleOptions.api.methods : ['patch', 'delete', 'get', 'post']
+    nuxt.options.runtimeConfig.session = defu(nuxt.options.runtimeConfig.session, options)
+    nuxt.options.runtimeConfig.public = defu(nuxt.options.runtimeConfig.public, { session: { api: options.api } })
 
     // 3. Locate runtime directory and transpile module
     const runtimeDir = fileURLToPath(new URL('./runtime', import.meta.url))
@@ -157,12 +150,12 @@ export default defineNuxtModule<ModuleOptions>({
     nuxt.options.serverHandlers.unshift(serverHandler)
 
     // 5. Register desired session API endpoints
-    if (moduleOptions.api.isEnabled) {
-      for (const apiMethod of moduleOptions.api.methods) {
+    if (options.api.isEnabled) {
+      for (const apiMethod of options.api.methods) {
         const handler = resolve(runtimeDir, `server/api/session.${apiMethod}`)
-        addServerHandler({ handler, route: moduleOptions.api.basePath })
+        addServerHandler({ handler, route: options.api.basePath })
       }
-      logger.info(`Session API "${moduleOptions.api.methods.join(', ')}" endpoints registered at "${moduleOptions.api.basePath}"`)
+      logger.info(`Session API "${options.api.methods.join(', ')}" endpoints registered at "${options.api.basePath}"`)
     } else {
       logger.info('Session API disabled')
     }
