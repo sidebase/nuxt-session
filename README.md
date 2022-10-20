@@ -107,7 +107,7 @@ The session that `nuxt-session` maintains for you also allows you to store arbit
 
 Reading session data is generally safe on both the client- and server-side, unless it contains anything you don't want your users to see.
 
-Allowing alteration of session-data with arbitrary data provided by the client (e.g., your user) should be treated carefully, but can be safely done if you don't care about your users polluting sessions, have authentication and authorization or are generally not concerned about the security of your app. If you want
+Allowing alteration of session-data with arbitrary data provided by the client (e.g., your user) should be treated carefully, but can be safely done if you don't care about your users polluting sessions, have authentication and authorization or are generally not concerned about the security of your app.
 
 #### Client Side Access
 
