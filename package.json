@@ -31,6 +31,7 @@
   "dependencies": {
     "@nuxt/kit": "^3.0.0-rc.12",
     "dayjs": "^1.11.5",
+    "defu": "^6.1.0",
     "h3": "^0.8.5",
     "unstorage": "^0.6.0"
   },

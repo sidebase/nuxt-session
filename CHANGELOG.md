@@ -1,5 +1,7 @@
 # Changelog
 
+See more recent releases on the releases page: https://github.com/sidebase/nuxt-session/releases
+
 ## 0.1.2 (2022/10/13)
 
 - fix: remove dependency on self

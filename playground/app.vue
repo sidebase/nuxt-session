@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { useFetch } from '#app'
 import { computed, ref } from 'vue'
-import { useNuxtSession } from '#imports'
+import { useSession } from '#imports'
 
-const { session, refresh, reset, remove, update } = await useNuxtSession()
+const { session, refresh, reset, remove, update } = await useSession()
 
 // Counter demo
 const { refresh: increaseCountOnServer } = await useFetch('/api/count', { server: false, immediate: false })
@@ -33,7 +33,7 @@ const value = ref('')
     <hr>
     <div>
       <h3>Counting</h3>
-      <p>With nuxt-session you can either access the current user session safely on the server side using `event.context.session`. You can also use the `update`-method of the `useNuxtSession` composable that allows arbitrary updating of session data from the client-side.</p>
+      <p>With nuxt-session you can either access the current user session safely on the server side using `event.context.session`. You can also use the `update`-method of the `useSession` composable that allows arbitrary updating of session data from the client-side.</p>
       <p>Below both possible options are show-cased. One button triggers a request to the `/api/count` endpoint that increases the request count on the server side. The second button sends a JSON-payload to the nuxt-session API endpoint that allows arbitrary updating of session data with data sent from the client side.</p>
       <p>When you increase the count on the server-side, the session here will not change. You need to hit the `refresh` button above to see the changes! When we update it from the client-side using the nuxt-session composable `update` for it, we immeadiatly see the updates reflected, neat!</p>
       <p>NOTE: The server-side and client-side count update can collide with each other, e.g., if you update the count on the server side a couple of times and then update the count from the client side without refreshing the session. As the client only has the "old" count, it will send a different count than the count that the server currently knows and thus overwrite it.</p>
