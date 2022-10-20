@@ -9,13 +9,13 @@
 [![Follow us on Twitter](https://badgen.net/badge/icon/twitter?icon=twitter&label)](https://twitter.com/sidebase_io)
 [![Join our Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/9MUHR8WT9B)
 
-> Nuxt session middleware to get a persistent session per app user, e.g., to store data across multiple requests. The nuxt session module provides the `useNuxtSession()` composable out of the box and sets up API endpoints to interact with your session to make working with sessions feel like a breeze.
+> Nuxt session middleware to get a persistent session per app user, e.g., to store data across multiple requests. The nuxt session module provides the `useSession()` composable out of the box and sets up API endpoints to interact with your session to make working with sessions feel like a breeze.
 
 ## Quick start
 
 1. Install the package:
     ```bash
-    npm i @sidebase/nuxt-session
+    npm i -D @sidebase/nuxt-session
     ```
 2. Add the package to your `nuxt.config.ts`:
     ```bash
@@ -26,7 +26,7 @@
 3. Done! Each client will now have a unique session you can access on the server- and client side:
     - client-side (from any `.vue` file):
         ```ts
-        const { session, refresh, update, reset } = await useNuxtSession()
+        const { session, refresh, update, reset } = await useSession()
 
         // Reactive session object that updates after methods calls below
         session.value
@@ -51,7 +51,7 @@ The `nuxt-session` library provide many helpers to interact with the session fro
 ## Features
 
 - ✔️ Persistent sessions across requests using cookies
-- ✔️ `useNuxtSession` composable for client side session-interaction
+- ✔️ `useSession` composable for client side session-interaction
 - ✔️ Configurable session endpoints out of the box:
     - `GET /api/session`: Get the current session
     - `DELETE /api/session`: Delete the current session
@@ -120,7 +120,7 @@ const {
   reset,
   update,
   overwrite
-} = await useNuxtSession()
+} = await useSession()
 
 // The session itself, a ref that automatically updates when you use the other methods below
 session.value
@@ -145,7 +145,7 @@ Per default all of the above is enabled. Read on if you want to learn how to con
 
 You can configure what endpoints and utilities `nuxt-session` adds for client-side use using the module configuration. The API is fully enabled per default. If you want to turn off the whole `nuxt-session` API you can set `session: { api: { isEnabled: false } }` in the module config in your `nuxt.config.ts`. If you want to keep the api enabled but allow just certain operation by the client-side, you can restrict the HTTP methods that should be allowed. E.g., `session: { api: { methods: ['get'] } }` would:
 - add only one endpoint that allows reading the current session data (per default: `GET /api/session`)
-- enable only the `session` and `refresh` properties of the `useNuxtSession` composable
+- enable only the `session` and `refresh` properties of the `useSession` composable
 
 After this, calling the `reset()` or `update()` functions from above would result in an error that the methods are not supported and the api endpoints would not be added to your nuxt-app. This way:
 - you cannot accidentaly call a composable-method during development and it later does not work in production,
