@@ -1,8 +1,8 @@
 import { resolve } from 'path'
 import { fileURLToPath } from 'url'
 import { addImportsDir, addServerHandler, defineNuxtModule, useLogger } from '@nuxt/kit'
-import { CreateStorageOptions } from 'unstorage'
 import { defu } from 'defu'
+import { BuiltinDriverName } from 'unstorage'
 
 export type SameSiteOptions = 'lax' | 'strict' | 'none'
 export type SupportedSessionApiMethods = 'patch' | 'delete' | 'get' | 'post'
@@ -15,37 +15,39 @@ declare interface SessionOptions {
    * @type number | null
    */
   expiryInSeconds: number | null
-   /**
-    * How many characters the random session id should be long
-    * @default 64
-    * @example 128
-    * @type number
-    */
+  /**
+   * How many characters the random session id should be long
+   * @default 64
+   * @example 128
+   * @type number
+   */
   idLength: number
-   /**
-    * What prefix to use to store session information via `unstorage`
-    * @default 64
-    * @example 128
-    * @type number
-    * @docs https://github.com/unjs/unstorage
-    */
-   storePrefix: string
-   /**
-    * When to attach session cookie to requests
-    * @default 'lax'
-    * @example 'strict'
-    * @type SameSiteOptions
-    * @docs https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite
-    */
-   cookieSameSite: SameSiteOptions
-   /**
-    * Driver configuration for session-storage. Per default in-memory storage is used
-    * @default {}
-    * @example { driver: redisDriver({ base:  'storage:' }) }
-    * @type CreateStorageOptions
-    * @docs https://github.com/unjs/unstorage
-    */
-   storageOptions: CreateStorageOptions,
+  /**
+   * What prefix to use to store session information via `unstorage`
+   * @default "sessions"
+   * @example "userSessions"
+   * @type number
+   * @docs https://github.com/unjs/unstorage
+   */
+  storePrefix: string
+  /**
+   * When to attach session cookie to requests
+   * @default 'lax'
+   * @example 'strict'
+   * @type SameSiteOptions
+   * @docs https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite
+   */
+  cookieSameSite: SameSiteOptions
+  /**
+   * Driver configuration for session-storage. Per default in-memory storage is used
+   * @default {}
+   * @example { driver: 'redis' }
+   * @docs https://nitro.unjs.io/guide/introduction/storage
+   */
+  storageOptions: {
+    driver: BuiltinDriverName | string;
+    [option: string]: any;
+  },
 }
 
 declare interface ApiOptions {
@@ -55,22 +57,22 @@ declare interface ApiOptions {
    * @example false
    * @type boolean
    */
-   isEnabled: boolean
-   /**
-    * Configure which session API methods are enabled. All api methods are enabled by default. Restricting the enabled methods can be useful if you want to allow the client to read session-data but not modify it. Passing
-    * an empty array will result in all API methods being registered. Disable the api via the `api.isEnabled` option.
-    * @default []
-    * @example ['get']
-    * @type SupportedSessionApiMethods[]
-    */
-   methods: SupportedSessionApiMethods[]
-   /**
-    * Base path of the session api.
-    * @default /api/session
-    * @example /_session
-    * @type string
-    */
-   basePath: string
+  isEnabled: boolean
+  /**
+   * Configure which session API methods are enabled. All api methods are enabled by default. Restricting the enabled methods can be useful if you want to allow the client to read session-data but not modify it. Passing
+   * an empty array will result in all API methods being registered. Disable the api via the `api.isEnabled` option.
+   * @default []
+   * @example ['get']
+   * @type SupportedSessionApiMethods[]
+   */
+  methods: SupportedSessionApiMethods[]
+  /**
+   * Base path of the session api.
+   * @default /api/session
+   * @example /_session
+   * @type string
+   */
+  basePath: string
 }
 
 export interface ModuleOptions {
@@ -102,7 +104,9 @@ const defaults: ModuleOptions = {
     idLength: 64,
     storePrefix: 'sessions',
     cookieSameSite: 'lax',
-    storageOptions: {}
+    storageOptions: {
+      driver: 'memory'
+    }
   },
   api: {
     isEnabled: true,
@@ -137,6 +141,8 @@ export default defineNuxtModule<ModuleOptions>({
     options.api.methods = moduleOptions.api.methods.length > 0 ? moduleOptions.api.methods : ['patch', 'delete', 'get', 'post']
     nuxt.options.runtimeConfig.session = defu(nuxt.options.runtimeConfig.session, options)
     nuxt.options.runtimeConfig.public = defu(nuxt.options.runtimeConfig.public, { session: { api: options.api } })
+    const nitroStorageOptions = defu(nuxt.options.nitro.storage, { [options.session.storePrefix]: options.session.storageOptions })
+    nuxt.options.nitro.storage = nitroStorageOptions
 
     // 3. Locate runtime directory and transpile module
     const runtimeDir = fileURLToPath(new URL('./runtime', import.meta.url))
