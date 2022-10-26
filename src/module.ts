@@ -1,11 +1,16 @@
 import { resolve } from 'path'
 import { fileURLToPath } from 'url'
-import { addImportsDir, addServerHandler, defineNuxtModule, useLogger } from '@nuxt/kit'
+import { addImportsDir, addServerHandler, defineNuxtModule, useLogger, addImports } from '@nuxt/kit'
 import { defu } from 'defu'
-import { BuiltinDriverName } from 'unstorage'
+import { BuiltinDriverName, builtinDrivers, createStorage, CreateStorageOptions } from 'unstorage'
 
 export type SameSiteOptions = 'lax' | 'strict' | 'none'
 export type SupportedSessionApiMethods = 'patch' | 'delete' | 'get' | 'post'
+
+interface StorageConfig {
+  driver: BuiltinDriverName,
+  [option: string]: any
+}
 
 declare interface SessionOptions {
   /**
@@ -44,10 +49,7 @@ declare interface SessionOptions {
    * @example { driver: 'redis' }
    * @docs https://nitro.unjs.io/guide/introduction/storage
    */
-  storageOptions: {
-    driver: BuiltinDriverName | string;
-    [option: string]: any;
-  },
+  storageOptions: StorageConfig,
 }
 
 declare interface ApiOptions {
@@ -141,8 +143,11 @@ export default defineNuxtModule<ModuleOptions>({
     options.api.methods = moduleOptions.api.methods.length > 0 ? moduleOptions.api.methods : ['patch', 'delete', 'get', 'post']
     nuxt.options.runtimeConfig.session = defu(nuxt.options.runtimeConfig.session, options)
     nuxt.options.runtimeConfig.public = defu(nuxt.options.runtimeConfig.public, { session: { api: options.api } })
-    const nitroStorageOptions = defu(nuxt.options.nitro.storage, { [options.session.storePrefix]: options.session.storageOptions })
-    nuxt.options.nitro.storage = nitroStorageOptions
+
+    //setup unstorage
+    const storage = setupStorage(options.session.storageOptions, options.session.storePrefix)
+    // const nitroStorageOptions = defu(nuxt.options.nitro.storage, { [options.session.storePrefix]: options.session.storageOptions })
+    // nuxt.options.nitro.storage = nitroStorageOptions
 
     // 3. Locate runtime directory and transpile module
     const runtimeDir = fileURLToPath(new URL('./runtime', import.meta.url))
@@ -173,3 +178,14 @@ export default defineNuxtModule<ModuleOptions>({
     logger.success('Session setup complete')
   }
 })
+
+async function setupStorage (storageConfig: StorageConfig, prefix) {
+  const storage = createStorage()
+  const { driver, options } = storageConfig
+
+  const storageDriver = await import(builtinDrivers[driver])
+    .then(r => r.default || r)
+  storage.mount(prefix, storageDriver(options))
+
+  return storage
+}
