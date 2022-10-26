@@ -1,4 +1,4 @@
-import { H3Event, defineEventHandler, setCookie, parseCookies, deleteCookie } from 'h3'
+import { H3Event, eventHandler, setCookie, parseCookies, deleteCookie } from 'h3'
 import { nanoid } from 'nanoid'
 import dayjs from 'dayjs'
 import type { SameSiteOptions } from '../../../../module'
@@ -112,7 +112,7 @@ const ensureSession = async (event: H3Event) => {
   return session
 }
 
-export default defineEventHandler(async (event: H3Event) => {
+export default eventHandler(async (event: H3Event) => {
   // 1. Ensure that a session is present by either loading or creating one
   await ensureSession(event)
 

@@ -42,8 +42,10 @@
         ```
     - server-side (e.g., from `server/api` files):
         ```ts
+        import { eventHandler } from 'h3'
+
         // Return all session data to the frontend
-        export default defineEventHandler(event => event.context.session)
+        export default eventHandler(event => event.context.session)
         ```
 
 The `nuxt-session` library provide many helpers to interact with the session from the client- and server-side For more documentation and examples look at the [documentation](#documentation)
@@ -167,7 +169,7 @@ const { data, pending, error, refresh } = await update({ "hello": "session", "te
 `nuxt-session` makes the data of the current session available to all endpoints and middlewares as part of the `event` that is passed into the endpoints and middlewares at `event.context.session`. For example [here's](https://github.com/sidebase/nuxt-session/blob/main/playground/server/api/count.get.ts) how you can implement a server-side request counting endpoint that stores how many requests to this endpoint where performed by that specific session:
 ```ts
 // File: `playground/server/api/count.get.ts`
-export default defineEventHandler((event) => {
+export default eventHandler((event) => {
   // Get the current count or set to 0 if this is the first request
   const currentCount = event.context.session.count || 0
 
