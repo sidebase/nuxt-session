@@ -9,7 +9,7 @@ export type SupportedSessionApiMethods = 'patch' | 'delete' | 'get' | 'post'
 
 interface StorageConfig {
   driver: BuiltinDriverName,
-  [option: string]: any
+  options: object
 }
 
 declare interface SessionOptions {
@@ -107,7 +107,8 @@ const defaults: ModuleOptions = {
     storePrefix: 'sessions',
     cookieSameSite: 'lax',
     storageOptions: {
-      driver: 'memory'
+      driver: 'memory',
+      options: {}
     }
   },
   api: {
@@ -127,7 +128,7 @@ export default defineNuxtModule<ModuleOptions>({
   },
   defaults,
   hooks: {},
-  setup (moduleOptions, nuxt) {
+  async setup (moduleOptions, nuxt) {
     const logger = useLogger(PACKAGE_NAME)
 
     // 1. Check if module should be enabled at all
@@ -144,10 +145,9 @@ export default defineNuxtModule<ModuleOptions>({
     nuxt.options.runtimeConfig.session = defu(nuxt.options.runtimeConfig.session, options)
     nuxt.options.runtimeConfig.public = defu(nuxt.options.runtimeConfig.public, { session: { api: options.api } })
 
-    //setup unstorage
-    const storage = setupStorage(options.session.storageOptions, options.session.storePrefix)
-    // const nitroStorageOptions = defu(nuxt.options.nitro.storage, { [options.session.storePrefix]: options.session.storageOptions })
-    // nuxt.options.nitro.storage = nitroStorageOptions
+    // setup unstorage
+    // TODO: provide this in a useSessionStorage() utility
+    const storage = await setupStorage(options.session.storageOptions, options.session.storePrefix)
 
     // 3. Locate runtime directory and transpile module
     const runtimeDir = fileURLToPath(new URL('./runtime', import.meta.url))
