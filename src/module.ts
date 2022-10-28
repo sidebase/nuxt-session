@@ -2,7 +2,7 @@ import { resolve } from 'path'
 import { fileURLToPath } from 'url'
 import { addImportsDir, addServerHandler, defineNuxtModule, useLogger, addImports } from '@nuxt/kit'
 import { defu } from 'defu'
-import { BuiltinDriverName, builtinDrivers, createStorage, CreateStorageOptions } from 'unstorage'
+import { BuiltinDriverName, builtinDrivers } from 'unstorage'
 
 export type SameSiteOptions = 'lax' | 'strict' | 'none'
 export type SupportedSessionApiMethods = 'patch' | 'delete' | 'get' | 'post'
@@ -128,7 +128,7 @@ export default defineNuxtModule<ModuleOptions>({
   },
   defaults,
   hooks: {},
-  async setup (moduleOptions, nuxt) {
+  setup (moduleOptions, nuxt) {
     const logger = useLogger(PACKAGE_NAME)
 
     // 1. Check if module should be enabled at all
@@ -146,9 +146,7 @@ export default defineNuxtModule<ModuleOptions>({
     nuxt.options.runtimeConfig.public = defu(nuxt.options.runtimeConfig.public, { session: { api: options.api } })
 
     // setup unstorage
-    // TODO: provide this in a useSessionStorage() utility
-    const storage = await setupStorage(options.session.storageOptions, options.session.storePrefix)
-
+    addImports([{ from: builtinDrivers[options.session.storageOptions.driver], name: 'default', as: 'sessionStorageDriver' }])
     // 3. Locate runtime directory and transpile module
     const runtimeDir = fileURLToPath(new URL('./runtime', import.meta.url))
 
@@ -178,14 +176,3 @@ export default defineNuxtModule<ModuleOptions>({
     logger.success('Session setup complete')
   }
 })
-
-async function setupStorage (storageConfig: StorageConfig, prefix) {
-  const storage = createStorage()
-  const { driver, options } = storageConfig
-
-  const storageDriver = await import(builtinDrivers[driver])
-    .then(r => r.default || r)
-  storage.mount(prefix, storageDriver(options))
-
-  return storage
-}
