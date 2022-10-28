@@ -1,6 +1,6 @@
 import { resolve } from 'path'
 import { fileURLToPath } from 'url'
-import { addImportsDir, addServerHandler, defineNuxtModule, useLogger, addImports } from '@nuxt/kit'
+import { addImportsDir, addServerHandler, defineNuxtModule, useLogger } from '@nuxt/kit'
 import { defu } from 'defu'
 import { BuiltinDriverName, builtinDrivers } from 'unstorage'
 
@@ -128,7 +128,7 @@ export default defineNuxtModule<ModuleOptions>({
   },
   defaults,
   hooks: {},
-  setup (moduleOptions, nuxt) {
+  setup(moduleOptions, nuxt) {
     const logger = useLogger(PACKAGE_NAME)
 
     // 1. Check if module should be enabled at all
@@ -144,9 +144,12 @@ export default defineNuxtModule<ModuleOptions>({
     options.api.methods = moduleOptions.api.methods.length > 0 ? moduleOptions.api.methods : ['patch', 'delete', 'get', 'post']
     nuxt.options.runtimeConfig.session = defu(nuxt.options.runtimeConfig.session, options)
     nuxt.options.runtimeConfig.public = defu(nuxt.options.runtimeConfig.public, { session: { api: options.api } })
-
     // setup unstorage
-    addImports([{ from: builtinDrivers[options.session.storageOptions.driver], name: 'default', as: 'sessionStorageDriver' }])
+    nuxt.options.nitro.virtual = defu(nuxt.options.nitro.virtual,
+      {
+        '#session-driver': `export { default } from '${builtinDrivers[options.session.storageOptions.driver]}'`,
+        '#session-config': `export default ${JSON.stringify(options)}`
+      })
     // 3. Locate runtime directory and transpile module
     const runtimeDir = fileURLToPath(new URL('./runtime', import.meta.url))
 
