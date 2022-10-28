@@ -12,43 +12,43 @@ interface StorageConfig {
 }
 
 declare interface SessionOptions {
-  /**
+/**
    * Set the session duration in seconds. Once the session expires, a new one with a new id will be created. Set to `null` for infinite sessions
    * @default 600
    * @example 30
    * @type number | null
    */
   expiryInSeconds: number | null
-  /**
-   * How many characters the random session id should be long
-   * @default 64
-   * @example 128
-   * @type number
-   */
+   /**
+    * How many characters the random session id should be long
+    * @default 64
+    * @example 128
+    * @type number
+    */
   idLength: number
-  /**
-   * What prefix to use to store session information via `unstorage`
-   * @default "sessions"
-   * @example "userSessions"
-   * @type number
-   * @docs https://github.com/unjs/unstorage
-   */
-  storePrefix: string
-  /**
-   * When to attach session cookie to requests
-   * @default 'lax'
-   * @example 'strict'
-   * @type SameSiteOptions
-   * @docs https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite
-   */
-  cookieSameSite: SameSiteOptions
-  /**
-   * Driver configuration for session-storage. Per default in-memory storage is used
-   * @default {}
-   * @example { driver: 'redis' }
-   * @docs https://nitro.unjs.io/guide/introduction/storage
-   */
-  storageOptions: StorageConfig,
+   /**
+    * What prefix to use to store session information via `unstorage`
+    * @default "sessions"
+    * @example "userSessions"
+    * @type number
+    * @docs https://github.com/unjs/unstorage
+    */
+   storePrefix: string
+   /**
+    * When to attach session cookie to requests
+    * @default 'lax'
+    * @example 'strict'
+    * @type SameSiteOptions
+    * @docs https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite
+    */
+   cookieSameSite: SameSiteOptions
+   /**
+    * Driver configuration for session-storage. Per default in-memory storage is used
+    * @default {}
+    * @example { driver: 'redis', options: {url: 'localhost:6379'} }
+    * @docs https://nitro.unjs.io/guide/introduction/storage
+    */
+   storageOptions: CreateStorageOptions,
 }
 
 declare interface ApiOptions {
@@ -58,22 +58,22 @@ declare interface ApiOptions {
    * @example false
    * @type boolean
    */
-  isEnabled: boolean
-  /**
-   * Configure which session API methods are enabled. All api methods are enabled by default. Restricting the enabled methods can be useful if you want to allow the client to read session-data but not modify it. Passing
-   * an empty array will result in all API methods being registered. Disable the api via the `api.isEnabled` option.
-   * @default []
-   * @example ['get']
-   * @type SupportedSessionApiMethods[]
-   */
-  methods: SupportedSessionApiMethods[]
-  /**
-   * Base path of the session api.
-   * @default /api/session
-   * @example /_session
-   * @type string
-   */
-  basePath: string
+   isEnabled: boolean
+   /**
+    * Configure which session API methods are enabled. All api methods are enabled by default. Restricting the enabled methods can be useful if you want to allow the client to read session-data but not modify it. Passing
+    * an empty array will result in all API methods being registered. Disable the api via the `api.isEnabled` option.
+    * @default []
+    * @example ['get']
+    * @type SupportedSessionApiMethods[]
+    */
+   methods: SupportedSessionApiMethods[]
+   /**
+    * Base path of the session api.
+    * @default /api/session
+    * @example /_session
+    * @type string
+    */
+   basePath: string
 }
 
 export interface ModuleOptions {
