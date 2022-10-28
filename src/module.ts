@@ -1,6 +1,5 @@
-import { resolve } from 'path'
-import { fileURLToPath } from 'url'
-import { addImportsDir, addServerHandler, defineNuxtModule, useLogger } from '@nuxt/kit'
+import { addImportsDir, addServerHandler, createResolver, defineNuxtModule, useLogger } from '@nuxt/kit'
+import { CreateStorageOptions } from 'unstorage'
 import { defu } from 'defu'
 import { BuiltinDriverName, builtinDrivers } from 'unstorage'
 
@@ -151,10 +150,10 @@ export default defineNuxtModule<ModuleOptions>({
         '#session-config': `export default ${JSON.stringify(options)}`
       })
     // 3. Locate runtime directory and transpile module
-    const runtimeDir = fileURLToPath(new URL('./runtime', import.meta.url))
+    const { resolve } = createResolver(import.meta.url)
 
     // 4. Setup middleware, use `.unshift` to ensure (reasonably well) that the session middleware is first
-    const handler = resolve(runtimeDir, 'server/middleware/session')
+    const handler = resolve('./runtime/server/middleware/session')
     const serverHandler = {
       middleware: true,
       handler
@@ -164,7 +163,7 @@ export default defineNuxtModule<ModuleOptions>({
     // 5. Register desired session API endpoints
     if (options.api.isEnabled) {
       for (const apiMethod of options.api.methods) {
-        const handler = resolve(runtimeDir, `server/api/session.${apiMethod}`)
+        const handler = resolve(`./runtime/server/api/session.${apiMethod}`)
         addServerHandler({ handler, route: options.api.basePath })
       }
       logger.info(`Session API "${options.api.methods.join(', ')}" endpoints registered at "${options.api.basePath}"`)
@@ -173,7 +172,7 @@ export default defineNuxtModule<ModuleOptions>({
     }
 
     // 6. Add nuxt-session composables
-    const composables = resolve(runtimeDir, 'composables')
+    const composables = resolve('./runtime/composables')
     addImportsDir(composables)
 
     logger.success('Session setup complete')
