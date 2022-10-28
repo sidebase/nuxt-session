@@ -1,12 +1,11 @@
 import { addImportsDir, addServerHandler, createResolver, defineNuxtModule, useLogger } from '@nuxt/kit'
-import { CreateStorageOptions } from 'unstorage'
 import { defu } from 'defu'
 import { BuiltinDriverName, builtinDrivers } from 'unstorage'
 
 export type SameSiteOptions = 'lax' | 'strict' | 'none'
 export type SupportedSessionApiMethods = 'patch' | 'delete' | 'get' | 'post'
 
-interface StorageConfig {
+interface StorageOptions {
   driver: BuiltinDriverName,
   options: object
 }
@@ -44,11 +43,11 @@ declare interface SessionOptions {
    cookieSameSite: SameSiteOptions
    /**
     * Driver configuration for session-storage. Per default in-memory storage is used
-    * @default {}
+    * @default { driver: 'memory', options: {} }
     * @example { driver: 'redis', options: {url: 'localhost:6379'} }
     * @docs https://nitro.unjs.io/guide/introduction/storage
     */
-   storageOptions: CreateStorageOptions,
+   storageOptions: StorageOptions,
 }
 
 declare interface ApiOptions {
@@ -127,7 +126,7 @@ export default defineNuxtModule<ModuleOptions>({
   },
   defaults,
   hooks: {},
-  setup(moduleOptions, nuxt) {
+  setup (moduleOptions, nuxt) {
     const logger = useLogger(PACKAGE_NAME)
 
     // 1. Check if module should be enabled at all
