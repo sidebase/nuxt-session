@@ -1,6 +1,7 @@
 import { H3Event, eventHandler, setCookie, parseCookies, deleteCookie } from 'h3'
 import { nanoid } from 'nanoid'
 import dayjs from 'dayjs'
+import { hash, argon2id, verify } from 'argon2'
 import type { SameSiteOptions } from '../../../../module'
 import { dropStorageSession, getStorageSession, setStorageSession } from './storage'
 import { useRuntimeConfig } from '#imports'
@@ -24,13 +25,27 @@ export declare interface Session {
   [key: string]: any
 }
 
+const argon2Options = {
+  // cryptographically-secure salt is generated automatically
+  type: argon2id, // resistant against GPU & tradeoff attacks
+  hashLength: 60
+}
+
 /**
  * Get a hashed representation of the given IP address (for GDPR compliance)
  * @param ip string|undefined The IP address to hash
  */
-const hashIpAddress = (ip: string|undefined) => ip
+const hashIpAddress = (ip: string|undefined) =>
+  !ip
+    ? Promise.resolve(undefined)
+    : hash(ip, argon2Options)
 
-const compareIpAddresses = (ip: string|undefined, ipHash: string|undefined) => ip === ipHash
+/**
+ * Check that the given (raw) IP address and the hashed IP address match
+ * @param ip string|undefined The IP address to verify
+ * @param ipHash string|undefined The (hashed) IP address to test against
+ */
+const ipAddressesMatch = (ip: string|undefined, ipHash: string|undefined) => !(ip && ipHash) ? Promise.resolve(false) : verify(ipHash, ip, argon2Options)
 
 /**
  * Get the IP address corresponding to the user's request
@@ -83,7 +98,7 @@ const newSession = async (event: H3Event) => {
   const session: Session = {
     id: sessionId,
     createdAt: new Date(),
-    ip: sessionOptions.ipPinning ? hashIpAddress(getRequestIpAddress(event)) : undefined
+    ip: sessionOptions.ipPinning ? await hashIpAddress(getRequestIpAddress(event)) : undefined
   }
   await setStorageSession(sessionId, session)
 
@@ -121,7 +136,6 @@ const getSession = async (event: H3Event): Promise<null | Session> => {
 
     // 4.1. (Should not happen) No IP address present in the session even though the flag is enabled
     if (!hashedIP) {
-      await deleteSession(event) // Cleanup
       return null
     }
 
@@ -129,7 +143,8 @@ const getSession = async (event: H3Event): Promise<null | Session> => {
     const requestIP = getRequestIpAddress(event)
 
     // 4.3. Ensure pinning
-    if (!compareIpAddresses(requestIP, hashedIP)) {
+    const matches = await ipAddressesMatch(requestIP, hashedIP)
+    if (!matches) {
       // 4.4. Report session-jacking attempt
       // TODO: Report session-jacking attempt from requestIP
       return null
