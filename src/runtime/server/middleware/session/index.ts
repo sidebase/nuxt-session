@@ -84,9 +84,6 @@ export const deleteSession = async (event: H3Event) => {
 }
 
 const newSession = async (event: H3Event) => {
-  // Cleanup old session data to avoid leaks
-  await deleteSession(event)
-
   const runtimeConfig = useRuntimeConfig()
   const sessionOptions = runtimeConfig.session.session
 
@@ -126,6 +123,7 @@ const getSession = async (event: H3Event): Promise<null | Session> => {
   if (sessionExpiryInSeconds !== null) {
     const now = dayjs()
     if (now.diff(dayjs(session.createdAt), 'seconds') > sessionExpiryInSeconds) {
+      await deleteSession(event) // Cleanup old session data to avoid leaks
       return null
     }
   }
@@ -136,6 +134,7 @@ const getSession = async (event: H3Event): Promise<null | Session> => {
 
     // 4.1. (Should not happen) No IP address present in the session even though the flag is enabled
     if (!hashedIP) {
+      await deleteSession(event) // Cleanup to avoid leaks (and properly recreate a session)
       return null
     }
 
@@ -147,6 +146,7 @@ const getSession = async (event: H3Event): Promise<null | Session> => {
     if (!matches) {
       // 4.4. Report session-jacking attempt
       // TODO: Report session-jacking attempt from requestIP
+      // NOTE: DO NOT DELETE SESSION HERE, this would mean we eliminate session-jacking, but users could delete others' sessions
       return null
     }
   }
