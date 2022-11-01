@@ -201,6 +201,21 @@ You can configure the storage backend using the `session.session.storageOptions`
 
 Check out here what storage backends are supported and how to configure them: https://github.com/unjs/unstorage#drivers
 
+### IP Pinning
+
+For increased security, you can enable the `ipPinning` flag in the session options. This will make it so sessions are bound by both the session's ID and the user's IP, which means no [session-jacking](https://owasp.org/www-community/attacks/Session_hijacking_attack).
+
+For this feature to work, we rely on [`Socket#remoteAddress`](https://nodejs.org/api/net.html#socketremoteaddress) which means you might have to configure your (reverse) proxy to properly forward IP addresses (Usually via the `X-Forwarded-For` header):
+
+* [Using Apache 2](https://httpd.apache.org/docs/current/mod/mod_proxy.html#x-headers)
+* [Using NGINX](https://www.nginx.com/resources/wiki/start/topics/examples/forwarded/)
+* [Using CloudFlare](https://developers.cloudflare.com/fundamentals/get-started/reference/http-request-headers/)
+
+Supported headers (in order):
+* `X-Forwarded-For`
+* `True-Client-Ip`
+* `CF-Connecting-Ip`
+
 ### Configuration
 
 Here's what the full _default_ module configuration looks like:
@@ -220,7 +235,7 @@ Here's what the full _default_ module configuration looks like:
     // In-memory storage is used (these are `unjs/unstorage` options)
     storageOptions: {},
     // Sessions aren't pinned to the user's IP address
-    ipPinning: false,
+    ipPinning: false
   },
   api: {
     // The API is enabled
