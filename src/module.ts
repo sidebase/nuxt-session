@@ -44,6 +44,13 @@ declare interface SessionOptions {
     * @docs https://github.com/unjs/unstorage
     */
    storageOptions: CreateStorageOptions,
+   /**
+    * Whether to pin sessions to the user's IP (i.e. Different IP means a different session)
+    * @default false
+    * @example true
+    * @type boolean
+    */
+   ipPinning: boolean,
 }
 
 declare interface ApiOptions {
