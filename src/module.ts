@@ -145,8 +145,7 @@ export default defineNuxtModule<ModuleOptions>({
     // setup unstorage
     nuxt.options.nitro.virtual = defu(nuxt.options.nitro.virtual,
       {
-        '#session-driver': `export { default } from '${builtinDrivers[options.session.storageOptions.driver]}'`,
-        '#session-config': `export default ${JSON.stringify(options)}`
+        '#session-driver': `export { default } from '${builtinDrivers[options.session.storageOptions.driver]}'`
       })
     // 3. Locate runtime directory and transpile module
     const { resolve } = createResolver(import.meta.url)
@@ -177,3 +176,8 @@ export default defineNuxtModule<ModuleOptions>({
     logger.success('Session setup complete')
   }
 })
+
+declare module '#session-driver'{
+  const driver : BuiltinDriverName
+  export default driver
+}
