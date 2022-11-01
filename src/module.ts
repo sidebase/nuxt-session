@@ -176,8 +176,3 @@ export default defineNuxtModule<ModuleOptions>({
     logger.success('Session setup complete')
   }
 })
-
-declare module '#session-driver'{
-  const driver : BuiltinDriverName
-  export default driver
-}
