@@ -216,6 +216,8 @@ Supported headers (in order):
 * `True-Client-Ip`
 * `CF-Connecting-Ip`
 
+***WARNING:*** Only trust these headers when sent directly by your webserver or (reverse) proxy
+
 ### Configuration
 
 Here's what the full _default_ module configuration looks like:
