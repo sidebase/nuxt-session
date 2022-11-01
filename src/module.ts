@@ -107,7 +107,8 @@ const defaults: ModuleOptions = {
     idLength: 64,
     storePrefix: 'sessions',
     cookieSameSite: 'lax',
-    storageOptions: {}
+    storageOptions: {},
+    ipPinning: false
   },
   api: {
     isEnabled: true,

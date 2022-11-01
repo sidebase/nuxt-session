@@ -20,8 +20,23 @@ const safeSetCookie = (event: H3Event, name: string, value: string) => setCookie
 export declare interface Session {
   id: string
   createdAt: Date
+  ip?: string
   [key: string]: any
 }
+
+/**
+ * Get a hashed representation of the given IP address (for GDPR compliance)
+ * @param ip string|undefined The IP address to hash
+ */
+const hashIpAddress = (ip: string|undefined) => ip
+
+const compareIpAddresses = (ip: string|undefined, ipHash: string|undefined) => ip === ipHash
+
+/**
+ * Get the IP address corresponding to the user's request
+ * @param event H3Event Event passing through middleware
+ */
+const getRequestIpAddress = (event: H3Event): string|undefined => event.req.socket.remoteAddress
 
 /**
  * Get the current session id.
@@ -57,12 +72,19 @@ const newSession = async (event: H3Event) => {
   // Cleanup old session data to avoid leaks
   await deleteSession(event)
 
+  const runtimeConfig = useRuntimeConfig()
+  const sessionOptions = runtimeConfig.session.session
+
   // (Re-)Set cookie
-  const sessionId = nanoid(useRuntimeConfig().session.session.idLength)
+  const sessionId = nanoid(sessionOptions.idLength)
   safeSetCookie(event, SESSION_COOKIE_NAME, sessionId)
 
   // Store session data in storage
-  const session: Session = { id: sessionId, createdAt: new Date() }
+  const session: Session = {
+    id: sessionId,
+    createdAt: new Date(),
+    ip: sessionOptions.ipPinning ? hashIpAddress(getRequestIpAddress(event)) : undefined
+  }
   await setStorageSession(sessionId, session)
 
   return session
@@ -81,11 +103,35 @@ const getSession = async (event: H3Event): Promise<null | Session> => {
     return null
   }
 
+  const runtimeConfig = useRuntimeConfig()
+  const sessionOptions = runtimeConfig.session.session
+
   // 3. Is the session not expired?
-  const sessionExpiryInSeconds = useRuntimeConfig().session.session.expiryInSeconds
+  const sessionExpiryInSeconds = sessionOptions.expiryInSeconds
   if (sessionExpiryInSeconds !== null) {
     const now = dayjs()
     if (now.diff(dayjs(session.createdAt), 'seconds') > sessionExpiryInSeconds) {
+      return null
+    }
+  }
+
+  // 4. Check for IP pinning logic
+  if (sessionOptions.ipPinning) {
+    const hashedIP = session.ip
+
+    // 4.1. (Should not happen) No IP address present in the session even though the flag is enabled
+    if (!hashedIP) {
+      await deleteSession(event) // Cleanup
+      return null
+    }
+
+    // 4.2. Get request's IP
+    const requestIP = getRequestIpAddress(event)
+
+    // 4.3. Ensure pinning
+    if (!compareIpAddresses(requestIP, hashedIP)) {
+      // 4.4. Report session-jacking attempt
+      // TODO: Report session-jacking attempt from requestIP
       return null
     }
   }
@@ -94,11 +140,7 @@ const getSession = async (event: H3Event): Promise<null | Session> => {
 }
 
 function isSession (shape: unknown): shape is Session {
-  if (typeof shape === 'object' && !!shape && 'id' in shape && 'createdAt' in shape) {
-    return true
-  }
-
-  return false
+  return typeof shape === 'object' && !!shape && 'id' in shape && 'createdAt' in shape
 }
 
 const ensureSession = async (event: H3Event) => {
