@@ -1,7 +1,7 @@
 import { deleteCookie, eventHandler, H3Event, parseCookies, setCookie } from 'h3'
 import { nanoid } from 'nanoid'
 import dayjs from 'dayjs'
-import type { SameSiteOptions, SessionOptions } from '../../../../module'
+import { SameSiteOptions, Session, SessionOptions } from '../../../../types'
 import { dropStorageSession, getStorageSession, setStorageSession } from './storage'
 import { getHashedIpAddress, getRequestIpAddress, ipAddressesMatch } from './ipPinning'
 import { IpMissingFromSession, SessionExpired, SessionHijackAttempt } from './exceptions'
@@ -18,13 +18,6 @@ const safeSetCookie = (event: H3Event, name: string, value: string) => setCookie
   // Do not send cookies on many cross-site requests to mitigates CSRF and cross-site attacks, see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite#lax
   sameSite: useRuntimeConfig().session.session.cookieSameSite as SameSiteOptions
 })
-
-export declare interface Session {
-  id: string
-  createdAt: Date
-  ip?: string
-  [key: string]: any
-}
 
 const checkSessionExpirationTime = (session: Session, sessionOptions: SessionOptions) => {
   const sessionExpiryInSeconds = sessionOptions.expiryInSeconds

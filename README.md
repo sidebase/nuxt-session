@@ -203,20 +203,41 @@ Check out here what storage backends are supported and how to configure them: ht
 
 ### IP Pinning
 
-For increased security, you can enable the `ipPinning` flag in the session options. This will make it so sessions are bound by both the session's ID and the user's IP, which means no [session-jacking](https://owasp.org/www-community/attacks/Session_hijacking_attack).
+For increased security, you can enable the `ipPinning` flag in the session options by setting it to `true`.
 
-For this feature to work, we rely on [`Socket#remoteAddress`](https://nodejs.org/api/net.html#socketremoteaddress) which means you might have to configure your (reverse) proxy to properly forward IP addresses (Usually via the `X-Forwarded-For` header):
+This will make it so sessions are bound by both the session's ID and the user's IP, which means no [session-jacking](https://owasp.org/www-community/attacks/Session_hijacking_attack).
+
+For this feature to work, we rely on [`Socket#remoteAddress`](https://nodejs.org/api/net.html#socketremoteaddress).
+
+If you want, you can also configure your (reverse) proxy to properly forward IP addresses (Usually via the `X-Forwarded-For` header):
 
 * [Using Apache 2](https://httpd.apache.org/docs/current/mod/mod_proxy.html#x-headers)
 * [Using NGINX](https://www.nginx.com/resources/wiki/start/topics/examples/forwarded/)
 * [Using CloudFlare](https://developers.cloudflare.com/fundamentals/get-started/reference/http-request-headers/)
+* [Using Tomcat](https://tomcat.apache.org/tomcat-8.5-doc/api/org/apache/catalina/valves/RemoteIpValve.html)
+* [Using LiteSpeed](https://www.litespeedtech.com/support/wiki/doku.php/litespeed_wiki:config:show-real-ip-behind-a-proxy)
+* [Using Caddy](https://caddyserver.com/docs/caddyfile/directives/reverse_proxy#defaults)
+* [Using Lighttpd](https://redmine.lighttpd.net/projects/1/wiki/Docs_ModExtForward)
+* [Using Microsoft IIS](https://techcommunity.microsoft.com/t5/iis-support-blog/how-to-use-x-forwarded-for-header-to-log-actual-client-ip/ba-p/873115)
 
-Supported headers (in order):
-* `X-Forwarded-For`
-* `True-Client-Ip`
-* `CF-Connecting-Ip`
+***WARNING:*** Only trust these headers when sent directly by your webserver or (reverse) proxy. You should also clean up undesired/disallowed headers to avoid interpreting untrusted data from the client.
 
-***WARNING:*** Only trust these headers when sent directly by your webserver or (reverse) proxy
+To configure which header to read from, just set the `ipPinning` like this:
+```typescript
+{
+	// [...],
+    session: {
+        // [...]
+        ipPinning: {
+			headerName: "My-Custom-Ip-Header"
+        }
+        // [...]
+    },
+    // [...]
+}
+```
+
+Note that header names are case-insensitive and will be transformed to lowercase before inspection.
 
 ### Configuration
 

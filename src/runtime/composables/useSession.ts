@@ -1,8 +1,7 @@
 import { useFetch, createError } from '#app'
 import { nanoid } from 'nanoid'
 import { Ref, ref } from 'vue'
-import type { SupportedSessionApiMethods } from '../../module'
-import type { Session } from '../server/middleware/session'
+import type { Session, SupportedSessionApiMethods } from '../../types'
 import { useRuntimeConfig } from '#imports'
 
 type SessionData = Record<string, any>
