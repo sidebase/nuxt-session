@@ -5,7 +5,11 @@ import { defu } from 'defu'
 export type SameSiteOptions = 'lax' | 'strict' | 'none'
 export type SupportedSessionApiMethods = 'patch' | 'delete' | 'get' | 'post'
 
-declare interface SessionOptions {
+type DeepRequired<T> = T extends object ? Required<{
+  [Key in keyof T]: DeepRequired<T[Key]>
+}> : Required<T>;
+
+export interface SessionOptions {
   /**
    * Set the session duration in seconds. Once the session expires, a new one with a new id will be created. Set to `null` for infinite sessions
    * @default 600
@@ -53,7 +57,7 @@ declare interface SessionOptions {
    ipPinning: boolean,
 }
 
-declare interface ApiOptions {
+export interface ApiOptions {
   /**
    * Whether to enable the session API endpoints that allow read, update and delete operations from the client side. Use `/api/session` to access the endpoints.
    * @default true
@@ -117,6 +121,14 @@ const defaults: ModuleOptions = {
   }
 }
 
+export interface ModuleRuntimeConfig {
+  session: ModuleOptions;
+}
+
+export interface ModulePublicRuntimeConfig {
+  api: ApiOptions;
+}
+
 export default defineNuxtModule<ModuleOptions>({
   meta: {
     name: `@sidebase/${PACKAGE_NAME}`,
@@ -139,9 +151,9 @@ export default defineNuxtModule<ModuleOptions>({
     logger.info('Setting up sessions...')
 
     // 2. Set public and private runtime configuration
-    const options = defu(moduleOptions, defaults)
+    const options = defu(moduleOptions, defaults) as DeepRequired<ModuleOptions>
     options.api.methods = moduleOptions.api.methods.length > 0 ? moduleOptions.api.methods : ['patch', 'delete', 'get', 'post']
-    nuxt.options.runtimeConfig.session = defu(nuxt.options.runtimeConfig.session, options)
+    nuxt.options.runtimeConfig.session = defu(nuxt.options.runtimeConfig.session, options) as DeepRequired<ModuleOptions>
     nuxt.options.runtimeConfig.public = defu(nuxt.options.runtimeConfig.public, { session: { api: options.api } })
 
     // 3. Locate runtime directory and transpile module

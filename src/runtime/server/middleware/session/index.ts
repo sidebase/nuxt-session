@@ -1,7 +1,7 @@
 import { deleteCookie, eventHandler, H3Event, parseCookies, setCookie } from 'h3'
 import { nanoid } from 'nanoid'
 import dayjs from 'dayjs'
-import type { SameSiteOptions } from '../../../../module'
+import type { SameSiteOptions, SessionOptions } from '../../../../module'
 import { dropStorageSession, getStorageSession, setStorageSession } from './storage'
 import { getHashedIpAddress, getRequestIpAddress, ipAddressesMatch } from './ipPinning'
 import { IpMissingFromSession, SessionExpired, SessionHijackAttempt } from './exceptions'
@@ -26,14 +26,23 @@ export declare interface Session {
   [key: string]: any
 }
 
-const checkSessionExpirationTime = (session: Session, sessionExpiryInSeconds: number) => {
+const checkSessionExpirationTime = (session: Session, sessionOptions: SessionOptions) => {
+  const sessionExpiryInSeconds = sessionOptions.expiryInSeconds
+  if (sessionExpiryInSeconds === null) {
+    return
+  }
+
   const now = dayjs()
   if (now.diff(dayjs(session.createdAt), 'seconds') > sessionExpiryInSeconds) {
     throw new SessionExpired()
   }
 }
 
-const checkSessionIp = async (event: H3Event, session) => {
+const checkSessionIp = async (event: H3Event, session: Session, sessionOptions: SessionOptions) => {
+  if (!sessionOptions.ipPinning) {
+    return
+  }
+
   const hashedIP = session.ip
 
   // 4.1. (Should not happen) No IP address present in the session even though the flag is enabled
@@ -117,19 +126,14 @@ const getSession = async (event: H3Event): Promise<null | Session> => {
   }
 
   const runtimeConfig = useRuntimeConfig()
-  const sessionOptions = runtimeConfig.session.session
+  const sessionOptions = runtimeConfig.session.session as SessionOptions
 
   try {
     // 3. Is the session not expired?
-    const sessionExpiryInSeconds = sessionOptions.expiryInSeconds
-    if (sessionExpiryInSeconds !== null) {
-      checkSessionExpirationTime(session, sessionExpiryInSeconds)
-    }
+    checkSessionExpirationTime(session, sessionOptions)
 
     // 4. Check for IP pinning logic
-    if (sessionOptions.ipPinning) {
-      await checkSessionIp(event, session)
-    }
+    await checkSessionIp(event, session, sessionOptions)
   } catch (e) {
     // NOTE: DO NOT DELETE SESSION ON HIJACK ATTEMPTS, this would mean we eliminate session-jacking, but users could delete others' sessions
     const shouldCleanup = !(e instanceof SessionHijackAttempt)
