@@ -48,3 +48,7 @@ export const getRequestIpAddress = ({ req }: H3Event): string | undefined => {
 
   return foundIp ?? req.connection?.remoteAddress ?? req.socket.remoteAddress
 }
+
+export const getHashedIpAddress = (event: H3Event): Promise<string|undefined> => {
+  return hashIpAddress(getRequestIpAddress(event))
+}

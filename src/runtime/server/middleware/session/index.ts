@@ -3,7 +3,7 @@ import { nanoid } from 'nanoid'
 import dayjs from 'dayjs'
 import type { SameSiteOptions } from '../../../../module'
 import { dropStorageSession, getStorageSession, setStorageSession } from './storage'
-import { getRequestIpAddress, hashIpAddress, ipAddressesMatch } from './ipPinning'
+import { getHashedIpAddress, getRequestIpAddress, hashIpAddress, ipAddressesMatch } from "./ipPinning";
 import { useRuntimeConfig } from '#imports'
 
 const SESSION_COOKIE_NAME = 'sessionId'
@@ -67,7 +67,7 @@ const newSession = async (event: H3Event) => {
   const session: Session = {
     id: sessionId,
     createdAt: new Date(),
-    ip: sessionOptions.ipPinning ? await hashIpAddress(getRequestIpAddress(event)) : undefined
+    ip: sessionOptions.ipPinning ? await getHashedIpAddress(event) : undefined
   }
   await setStorageSession(sessionId, session)
 
