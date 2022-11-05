@@ -1,8 +1,8 @@
-import { createStorage } from 'unstorage'
+import { createStorage, prefixStorage } from 'unstorage'
+import { useRuntimeConfig } from '#imports'
 // @ts-ignore
 import sessionDriver from '#session-driver'
-import { useRuntimeConfig } from '#imports'
-const config = useRuntimeConfig()
-const sessionConfig = config.session
-const driver = sessionDriver(sessionConfig.session.storageOptions.options)
-export const sessionStorage = createStorage({ driver }).mount(sessionConfig.session.storePrefix, driver)
+const sessionConfig = useRuntimeConfig().session.session
+const driver = sessionDriver(sessionConfig.storageOptions.options)
+const storage = createStorage({ driver }).mount(sessionConfig.storePrefix, driver)
+export const sessionStorage = prefixStorage(storage, sessionConfig.storePrefix)
