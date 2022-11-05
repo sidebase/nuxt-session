@@ -1,13 +1,23 @@
 import { addImportsDir, addServerHandler, createResolver, defineNuxtModule, useLogger } from '@nuxt/kit'
 import { defu } from 'defu'
 import { BuiltinDriverName, builtinDrivers } from 'unstorage'
+import type { FSStorageOptions } from 'unstorage/dist/drivers/fs'
+import type { KVOptions } from 'unstorage/dist/drivers/cloudflare-kv-binding'
+import type { KVHTTPOptions } from 'unstorage/dist/drivers/cloudflare-kv-http'
+import type { GithubOptions } from 'unstorage/dist/drivers/github'
+import type { HTTPOptions } from 'unstorage/dist/drivers/http'
+import type { OverlayStorageOptions } from 'unstorage/dist/drivers/overlay'
+import type { LocalStorageOptions } from 'unstorage/dist/drivers/localstorage'
+import type { RedisOptions } from 'unstorage/dist/drivers/redis'
+
+export type UnstorageDriverOption = FSStorageOptions | KVOptions | KVHTTPOptions | GithubOptions | HTTPOptions | OverlayStorageOptions | LocalStorageOptions | RedisOptions
 
 export type SameSiteOptions = 'lax' | 'strict' | 'none'
 export type SupportedSessionApiMethods = 'patch' | 'delete' | 'get' | 'post'
 
 interface StorageOptions {
   driver: BuiltinDriverName,
-  options: object
+  options?: UnstorageDriverOption
 }
 
 declare interface SessionOptions {
@@ -105,8 +115,7 @@ const defaults: ModuleOptions = {
     storePrefix: 'sessions',
     cookieSameSite: 'lax',
     storageOptions: {
-      driver: 'memory',
-      options: {}
+      driver: 'memory'
     }
   },
   api: {

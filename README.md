@@ -218,7 +218,9 @@ Here's what the full _default_ module configuration looks like:
     // The session cookie same site policy is `lax`
     cookieSameSite: 'lax',
     // In-memory storage is used (these are `unjs/unstorage` options)
-    storageOptions: {}
+    storageOptions: {
+        driver: 'memory'
+    }
   },
   api: {
     // The API is enabled
@@ -229,6 +231,26 @@ Here's what the full _default_ module configuration looks like:
     basePath: '/api/session'
   }
 }
+```
+### Using a different storage driver
+
+You can use any stroage driver supported by unstorage. For example, this will use the redis driver instead of the default memory driver.
+```ts
+//nuxt.config.ts
+{
+    ...,
+    session: {
+        session:{
+            storageOptions:{
+                driver: 'redis',
+                options: {
+                    url: 'redis://localhost:6379'
+                }
+            }
+        }
+    }
+}
+
 ```
 
 ### Security 
