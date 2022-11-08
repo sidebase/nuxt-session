@@ -1,6 +1,6 @@
 import { addImportsDir, addServerHandler, createResolver, defineNuxtModule, useLogger } from '@nuxt/kit'
-import { CreateStorageOptions } from 'unstorage'
 import { defu } from 'defu'
+import { BuiltinDriverName } from 'unstorage'
 
 export type SameSiteOptions = 'lax' | 'strict' | 'none'
 export type SupportedSessionApiMethods = 'patch' | 'delete' | 'get' | 'post'
@@ -43,7 +43,10 @@ declare interface SessionOptions {
     * @type CreateStorageOptions
     * @docs https://github.com/unjs/unstorage
     */
-   storageOptions: CreateStorageOptions,
+    storageOptions: {
+      driver: BuiltinDriverName | string;
+      [option: string]: any;
+    }
 }
 
 declare interface ApiOptions {
@@ -100,7 +103,9 @@ const defaults: ModuleOptions = {
     idLength: 64,
     storePrefix: 'sessions',
     cookieSameSite: 'lax',
-    storageOptions: {}
+    storageOptions: {
+      driver: 'memory'
+    }
   },
   api: {
     isEnabled: true,
@@ -135,7 +140,8 @@ export default defineNuxtModule<ModuleOptions>({
     options.api.methods = moduleOptions.api.methods.length > 0 ? moduleOptions.api.methods : ['patch', 'delete', 'get', 'post']
     nuxt.options.runtimeConfig.session = defu(nuxt.options.runtimeConfig.session, options)
     nuxt.options.runtimeConfig.public = defu(nuxt.options.runtimeConfig.public, { session: { api: options.api } })
-
+    const nitroStorageOptions = defu(nuxt.options.nitro.storage, { [options.session.storePrefix]: options.session.storageOptions })
+    nuxt.options.nitro.storage = nitroStorageOptions
     // 3. Locate runtime directory and transpile module
     const { resolve } = createResolver(import.meta.url)
 
