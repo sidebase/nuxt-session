@@ -4,8 +4,8 @@
     "url": "https://github.com/dalucema/nuxt-session-tbj/issues/new"
   },
   "homepage": "https://github.com/dalucema/nuxt-session-tbj",
-  "name": "@tbj/nuxt-session-tbj",
-  "version": "0.2.2",
+  "name": "@dalucema/nuxt-session-tbj",
+  "version": "0.2.3",
   "license": "MIT",
   "type": "module",
   "exports": {
