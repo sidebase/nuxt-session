@@ -15,12 +15,12 @@
 
 1. Install the package:
     ```bash
-    npm i -D @sidebase/nuxt-session
+    npm i -D @dalucema/nuxt-session-tbj
     ```
 2. Add the package to your `nuxt.config.ts`:
     ```bash
     export default defineNuxtConfig({
-      modules: ['@sidebase/nuxt-session'],
+      modules: ['@dalucema/nuxt-session-tbj'],
     })
     ```
 3. Done! Each client will now have a unique session you can access on the server- and client side:
