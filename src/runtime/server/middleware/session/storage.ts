@@ -1,7 +1,8 @@
-import { createStorage, prefixStorage, StorageValue } from 'unstorage'
-import { useRuntimeConfig } from '#imports'
+import { prefixStorage, StorageValue } from 'unstorage'
+import { useRuntimeConfig, useStorage } from '#imports'
 
-const storage = prefixStorage(createStorage(useRuntimeConfig().session.session.storageOptions), useRuntimeConfig().session.session.storePrefix)
+const baseStorage = useStorage()
+const storage = prefixStorage(baseStorage, useRuntimeConfig().session.session.storePrefix)
 
 export const getStorageSession = (sessionId: string) => storage.getItem(sessionId)
 export const setStorageSession = (sessionId: string, session: StorageValue) => storage.setItem(sessionId, session)

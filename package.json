@@ -1,11 +1,11 @@
 {
   "author": "sidestream-tech <support@sidestream.tech>",
   "bugs": {
-    "url": "https://github.com/sidebase/nuxt-session/issues/new"
+    "url": "https://github.com/dalucema/nuxt-session-tbj/issues/new"
   },
-  "homepage": "https://github.com/sidebase/nuxt-session",
-  "name": "@sidebase/nuxt-session",
-  "version": "0.2.2",
+  "homepage": "https://github.com/dalucema/nuxt-session-tbj",
+  "name": "@dalucema/nuxt-session-tbj",
+  "version": "0.2.3",
   "license": "MIT",
   "type": "module",
   "exports": {
