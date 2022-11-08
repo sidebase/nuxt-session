@@ -71,7 +71,7 @@ An example page making use of `nuxt-session`:
 
 See the playground to interactively use this:
 ```sh
-> git clone https://github.com/sidebase/nuxt-session
+> git clone https://github.com/dalucema/nuxt-session-tbj
 
 > cd nuxt-session
 
