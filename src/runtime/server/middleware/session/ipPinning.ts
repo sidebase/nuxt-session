@@ -1,6 +1,8 @@
 import { argon2id, hash, verify } from 'argon2'
 import { H3Event } from 'h3'
 import { useRuntimeConfig } from '#app'
+import { Session } from '../../../../types'
+import { IpMissingFromSession, IpMismatch } from './exceptions'
 
 const argon2Options = {
   // cryptographically-secure salt is generated automatically
@@ -22,7 +24,7 @@ export const hashIpAddress = (ip: string | undefined): Promise<string | undefine
  * @param ip string|undefined The IP address to verify
  * @param ipHash string|undefined The (hashed) IP address to test against
  */
-export const ipAddressesMatch = (ip: string | undefined, ipHash: string | undefined): Promise<boolean> => !(ip && ipHash) ? Promise.resolve(false) : verify(ipHash, ip, argon2Options)
+export const ipAddressesMatch = (ip: string | undefined, ipHash: string | undefined): Promise<boolean> => (!ip && !ipHash) ? Promise.resolve(false) : verify(ipHash, ip, argon2Options)
 
 /**
  * Extract the IP address from an HTTP header
@@ -55,9 +57,30 @@ export const getRequestIpAddress = ({ req }: H3Event): string | undefined => {
     return extractIpFromHeader(req.headers[headerName.toLowerCase()])
   }
 
-  return req.connection?.remoteAddress ?? req.socket.remoteAddress
+  return req.socket.remoteAddress
 }
 
 export const getHashedIpAddress = (event: H3Event): Promise<string|undefined> => {
   return hashIpAddress(getRequestIpAddress(event))
+}
+
+export const processSessionIp = async (event: H3Event, session: Session) => {
+  const hashedIP = session.ip
+
+  // 4.1. (Should not happen) No IP address present in the session even though the flag is enabled
+  if (!hashedIP) {
+    throw new IpMissingFromSession()
+  }
+
+  // 4.2. Get request's IP
+  const requestIP = getRequestIpAddress(event)
+
+  // 4.3. Ensure pinning
+  const matches = await ipAddressesMatch(requestIP, hashedIP)
+  if (!matches) {
+    // 4.4. Report session-jacking attempt
+    // TODO: Report session-jacking attempt from requestIP
+    // NOTE: DO NOT DELETE SESSION HERE, this would mean we eliminate session-jacking, but users could delete others' sessions
+    throw new IpMismatch()
+  }
 }
