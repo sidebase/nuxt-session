@@ -3,8 +3,8 @@ import { nanoid } from 'nanoid'
 import dayjs from 'dayjs'
 import { SameSiteOptions, Session, SessionOptions } from '../../../../types'
 import { dropStorageSession, getStorageSession, setStorageSession } from './storage'
-import { getHashedIpAddress, getRequestIpAddress, ipAddressesMatch } from './ipPinning'
-import { IpMissingFromSession, SessionExpired, SessionHijackAttempt } from './exceptions'
+import { processSessionIp, getHashedIpAddress } from './ipPinning'
+import { SessionExpired, IpMismatch } from './exceptions'
 import { useRuntimeConfig } from '#imports'
 
 const SESSION_COOKIE_NAME = 'sessionId'
@@ -19,40 +19,10 @@ const safeSetCookie = (event: H3Event, name: string, value: string) => setCookie
   sameSite: useRuntimeConfig().session.session.cookieSameSite as SameSiteOptions
 })
 
-const checkSessionExpirationTime = (session: Session, sessionOptions: SessionOptions) => {
-  const sessionExpiryInSeconds = sessionOptions.expiryInSeconds
-  if (sessionExpiryInSeconds === null) {
-    return
-  }
-
+const checkSessionExpirationTime = (session: Session, sessionExpiryInSeconds: number) => {
   const now = dayjs()
   if (now.diff(dayjs(session.createdAt), 'seconds') > sessionExpiryInSeconds) {
     throw new SessionExpired()
-  }
-}
-
-const checkSessionIp = async (event: H3Event, session: Session, sessionOptions: SessionOptions) => {
-  if (!sessionOptions.ipPinning) {
-    return
-  }
-
-  const hashedIP = session.ip
-
-  // 4.1. (Should not happen) No IP address present in the session even though the flag is enabled
-  if (!hashedIP) {
-    throw new IpMissingFromSession()
-  }
-
-  // 4.2. Get request's IP
-  const requestIP = getRequestIpAddress(event)
-
-  // 4.3. Ensure pinning
-  const matches = await ipAddressesMatch(requestIP, hashedIP)
-  if (!matches) {
-    // 4.4. Report session-jacking attempt
-    // TODO: Report session-jacking attempt from requestIP
-    // NOTE: DO NOT DELETE SESSION HERE, this would mean we eliminate session-jacking, but users could delete others' sessions
-    throw new SessionHijackAttempt()
   }
 }
 
@@ -120,16 +90,21 @@ const getSession = async (event: H3Event): Promise<null | Session> => {
 
   const runtimeConfig = useRuntimeConfig()
   const sessionOptions = runtimeConfig.session.session as SessionOptions
+  const sessionExpiryInSeconds = sessionOptions.expiryInSeconds
 
   try {
     // 3. Is the session not expired?
-    checkSessionExpirationTime(session, sessionOptions)
+    if (sessionExpiryInSeconds !== null) {
+      checkSessionExpirationTime(session, sessionExpiryInSeconds)
+    }
 
     // 4. Check for IP pinning logic
-    await checkSessionIp(event, session, sessionOptions)
+    if (sessionOptions.ipPinning) {
+      await processSessionIp(event, session)
+    }
   } catch (e) {
     // NOTE: DO NOT DELETE SESSION ON HIJACK ATTEMPTS, this would mean we eliminate session-jacking, but users could delete others' sessions
-    const shouldCleanup = !(e instanceof SessionHijackAttempt)
+    const shouldCleanup = !(e instanceof IpMismatch)
 
     if (shouldCleanup) {
       await deleteSession(event) // Cleanup old session data to avoid leaks
