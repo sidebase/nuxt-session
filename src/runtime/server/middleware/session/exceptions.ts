@@ -1,17 +1,17 @@
-export class SessionHijackAttempt extends Error {
-  constructor (message = 'session-jacking attempt') {
+export class IpMismatch extends Error {
+  constructor (message = 'User IP doesn\'t match the one in session') {
     super(message)
   }
 }
 
 export class IpMissingFromSession extends Error {
-  constructor (message = 'no IP in session even though ipPinning is enabled') {
+  constructor (message = 'No IP in session even though ipPinning is enabled') {
     super(message)
   }
 }
 
 export class SessionExpired extends Error {
-  constructor (message = 'session expired') {
+  constructor (message = 'Session expired') {
     super(message)
   }
 }
