@@ -4,7 +4,7 @@ import dayjs from 'dayjs'
 import { SameSiteOptions, Session, SessionOptions } from '../../../../types'
 import { dropStorageSession, getStorageSession, setStorageSession } from './storage'
 import { processSessionIp, getHashedIpAddress } from './ipPinning'
-import { SessionExpired, IpMismatch } from './exceptions'
+import { SessionExpired } from './exceptions'
 import { useRuntimeConfig } from '#imports'
 
 const SESSION_COOKIE_NAME = 'sessionId'
@@ -104,13 +104,8 @@ const getSession = async (event: H3Event): Promise<null | Session> => {
     if (sessionOptions.ipPinning) {
       await processSessionIp(event, session)
     }
-  } catch (e) {
-    // NOTE: DO NOT DELETE SESSION ON HIJACK ATTEMPTS, this would mean we eliminate session-jacking, but users could delete others' sessions
-    const shouldCleanup = !(e instanceof IpMismatch)
-
-    if (shouldCleanup) {
-      await deleteSession(event) // Cleanup old session data to avoid leaks
-    }
+  } catch {
+    await deleteSession(event) // Cleanup old session data to avoid leaks
 
     return null
   }

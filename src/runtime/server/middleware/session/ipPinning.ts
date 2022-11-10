@@ -80,7 +80,6 @@ export const processSessionIp = async (event: H3Event, session: Session) => {
   if (!matches) {
     // 4.4. Report session-jacking attempt
     // TODO: Report session-jacking attempt from requestIP
-    // NOTE: DO NOT DELETE SESSION HERE, this would mean we eliminate session-jacking, but users could delete others' sessions
     throw new IpMismatch()
   }
 }
