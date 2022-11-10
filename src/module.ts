@@ -45,7 +45,7 @@ declare interface SessionOptions {
     */
    storageOptions: CreateStorageOptions,
    /**
-   * Set the cookie domain for sharing on subdomains. If not include or value is null, the current domain will be set.
+   * Set the domain the session cookie will be receivable by. Setting `domain: null` results in setting the domain the cookie is initially set on. Specifying a domain will allow the domain and all its sub-domains.
    * @default null
    * @example '.example.com'
    * @type string | null
