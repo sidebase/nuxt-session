@@ -49,10 +49,8 @@ const extractIpFromHeader = (header?: string | string[]): string | undefined => 
 export const getRequestIpAddress = ({ req }: H3Event): string | undefined => {
   const sessionOptions = useRuntimeConfig().session.session
 
-  // @ts-ignore TODO: Fix this `nuxi prepare` bug
   const headerName = sessionOptions.ipPinning?.headerName
 
-  // @ts-ignore TODO: Fix this `nuxi prepare` bug
   if (typeof sessionOptions.ipPinning === 'object' && 'headerName' in sessionOptions.ipPinning.headerName) {
     return extractIpFromHeader(req.headers[headerName.toLowerCase()])
   }

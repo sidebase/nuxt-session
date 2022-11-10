@@ -53,8 +53,8 @@ export default defineNuxtModule<ModuleOptions>({
     // 2. Set public and private runtime configuration
     const options: FilledModuleOptions = defu(moduleOptions, defaults)
     options.api.methods = moduleOptions.api.methods.length > 0 ? moduleOptions.api.methods : ['patch', 'delete', 'get', 'post']
-    // @ts-ignore TODO: Fix this `nuxi prepare` bug
-    nuxt.options.runtimeConfig.session = defu(nuxt.options.runtimeConfig.session, options)
+    // @ts-ignore TODO: Fix this `nuxi prepare` bug (see https://github.com/nuxt/framework/issues/8728)
+    nuxt.options.runtimeConfig.session = defu(nuxt.options.runtimeConfig.session, options) as FilledModuleOptions
 
     const publicConfig: ModulePublicRuntimeConfig = { session: { api: options.api } }
     nuxt.options.runtimeConfig.public = defu(nuxt.options.runtimeConfig.public, publicConfig)
