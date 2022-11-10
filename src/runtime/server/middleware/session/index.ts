@@ -14,7 +14,9 @@ const safeSetCookie = (event: H3Event, name: string, value: string) => setCookie
   // Only send cookie via HTTP requests, do not allow access of cookie from JS to mitigate XSS attacks
   httpOnly: true,
   // Do not send cookies on many cross-site requests to mitigates CSRF and cross-site attacks, see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite#lax
-  sameSite: useRuntimeConfig().session.session.cookieSameSite as SameSiteOptions
+  sameSite: useRuntimeConfig().session.session.cookieSameSite as SameSiteOptions,
+  // Set cookie for subdomain
+  domain: useRuntimeConfig().session.session.domain,
 })
 
 export declare interface Session {

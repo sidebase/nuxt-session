@@ -44,6 +44,14 @@ declare interface SessionOptions {
     * @docs https://github.com/unjs/unstorage
     */
    storageOptions: CreateStorageOptions,
+   /**
+   * Set the domain the session cookie will be receivable by. Setting `domain: null` results in setting the domain the cookie is initially set on. Specifying a domain will allow the domain and all its sub-domains.
+   * @default null
+   * @example '.example.com'
+   * @type string | null
+   * @docs https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#define_where_cookies_are_sent
+   */
+   domain: string | null
 }
 
 declare interface ApiOptions {
@@ -100,6 +108,7 @@ const defaults: ModuleOptions = {
     idLength: 64,
     storePrefix: 'sessions',
     cookieSameSite: 'lax',
+    domain: null,
     storageOptions: {}
   },
   api: {
