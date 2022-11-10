@@ -57,7 +57,7 @@ The `nuxt-session` library provide many helpers to interact with the session fro
 - ✔️ Configurable session endpoints out of the box:
     - `GET /api/session`: Get the current session
     - `DELETE /api/session`: Delete the current session
-    - `POST /api/session`: Overwrite the current session data 
+    - `POST /api/session`: Overwrite the current session data
     - `PATCH /api/session`: Add to the current session data
 - ✔️ Storage via [unjs/unstorage](https://github.com/unjs/unstorage) - use memory, redis, fs, cloudflare-kv, ... to store your session data
 - ✔️ Automatic session and storage cleanup on expiry
@@ -115,10 +115,10 @@ Allowing alteration of session-data with arbitrary data provided by the client (
 
 On the client-side you can use the session like this:
 ```ts
-const { 
-  session, 
+const {
+  session,
   refresh,
-  remove, 
+  remove,
   reset,
   update,
   overwrite
@@ -195,49 +195,11 @@ In theory you can manipulate this data on the server side if you want to. If you
 
 ### Storage Backends
 
-`nuxt-session` allows you to use different storage backends. A storage backend is something like your server memory, a redis database, the file-system of your server, ... Supporting these backend is possible by using [unjs/unstorage](https://github.com/unjs/unstorage) for storage management. This library connects to the different backends it supports with a unified interface. 
+`nuxt-session` allows you to use different storage backends. A storage backend is something like your server memory, a redis database, the file-system of your server, ... Supporting these backend is possible by using [unjs/unstorage](https://github.com/unjs/unstorage) for storage management. This library connects to the different backends it supports with a unified interface.
 
 You can configure the storage backend using the `session.session.storageOptions` configuration option of the `nuxt-session` module. By default `memory` is used to store the sessions. This has some advantages like speed and easy setup, but some disadvantages like missing persistency (if your server crashes, the sessions are gone!) and possible exploits like setting millions of sessions trying to exhaust your server-memory or saving large amounts of data into the session that your server cannot handle.
 
 Check out here what storage backends are supported and how to configure them: https://github.com/unjs/unstorage#drivers
-
-### IP Pinning
-
-For increased security, you can enable the `ipPinning` flag in the session options by setting it to `true`.
-
-This will make it so sessions are bound by both the session's ID and the user's IP, which means no [session-jacking](https://owasp.org/www-community/attacks/Session_hijacking_attack).
-
-For this feature to work, we rely on [`Socket#remoteAddress`](https://nodejs.org/api/net.html#socketremoteaddress).
-
-If you want, you can also configure your (reverse) proxy to properly forward IP addresses (Usually via the `X-Forwarded-For` header):
-
-* [Using Apache 2](https://httpd.apache.org/docs/current/mod/mod_proxy.html#x-headers)
-* [Using NGINX](https://www.nginx.com/resources/wiki/start/topics/examples/forwarded/)
-* [Using CloudFlare](https://developers.cloudflare.com/fundamentals/get-started/reference/http-request-headers/)
-* [Using Tomcat](https://tomcat.apache.org/tomcat-8.5-doc/api/org/apache/catalina/valves/RemoteIpValve.html)
-* [Using LiteSpeed](https://www.litespeedtech.com/support/wiki/doku.php/litespeed_wiki:config:show-real-ip-behind-a-proxy)
-* [Using Caddy](https://caddyserver.com/docs/caddyfile/directives/reverse_proxy#defaults)
-* [Using Lighttpd](https://redmine.lighttpd.net/projects/1/wiki/Docs_ModExtForward)
-* [Using Microsoft IIS](https://techcommunity.microsoft.com/t5/iis-support-blog/how-to-use-x-forwarded-for-header-to-log-actual-client-ip/ba-p/873115)
-
-***WARNING:*** Only trust these headers when sent directly by your webserver or (reverse) proxy. You should also clean up undesired/disallowed headers to avoid interpreting untrusted data from the client.
-
-To configure which header to read from, just set the `ipPinning` like this:
-```typescript
-{
-	// [...],
-    session: {
-        // [...]
-        ipPinning: {
-			headerName: "My-Custom-Ip-Header"
-        }
-        // [...]
-    },
-    // [...]
-}
-```
-
-Note that header names are case-insensitive and will be transformed to lowercase before inspection.
 
 ### Configuration
 
@@ -257,6 +219,8 @@ Here's what the full _default_ module configuration looks like:
     cookieSameSite: 'lax',
     // In-memory storage is used (these are `unjs/unstorage` options)
     storageOptions: {},
+    // The request-domain is strictly used for the cookie, no sub-domains allowed
+    domain: null,
     // Sessions aren't pinned to the user's IP address
     ipPinning: false
   },
@@ -271,7 +235,7 @@ Here's what the full _default_ module configuration looks like:
 }
 ```
 
-### Security 
+### Security
 
 This section mostly contains a list of possible security problems and how to mitigate (some) of them. Note that the below flaws exist with many libraries and frameworks we use in our day-to-day when building and working with APIs. E.g., your vanilla-nuxt-app is not safe of some of them like the client sending malicious data. Missing in the below list are estimates of how likely it is that one of the list-items may occur and what impact it will have on your app. This is because that heavily depends on:
 - your app: Are you building a fun project? A proof of concept? The next fort-nox money management app?
@@ -291,7 +255,7 @@ Without further ado, here's some attack cases you can consider and take action a
         - use `redis` as a storage backend and set data to expire automatically
 3. guessing correct session ids
     - problems: session data can leak
-    - possible mitigations: 
+    - possible mitigations:
         - disable reading of data on the client side by disabling the api or setting `api: { methods: [] }`
         - increase the default sessionId length (although with `64` characters it already is quite long, in 2022)
         - use the `ipPinning` flag (although this means that everytime the user changes IP address, they'll lose their current session)

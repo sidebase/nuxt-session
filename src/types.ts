@@ -52,6 +52,14 @@ export interface SessionOptions {
    */
   storageOptions: CreateStorageOptions,
   /**
+   * Set the domain the session cookie will be receivable by. Setting `domain: null` results in setting the domain the cookie is initially set on. Specifying a domain will allow the domain and all its sub-domains.
+   * @default null
+   * @example '.example.com'
+   * @type string | null
+   * @docs https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#define_where_cookies_are_sent
+   */
+  domain: string | null,
+  /**
    * Whether to pin sessions to the user's IP (i.e. Different IP means a different session)
    * @default false
    * @example

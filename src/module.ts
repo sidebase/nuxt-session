@@ -19,6 +19,7 @@ const defaults: FilledModuleOptions = {
     storePrefix: 'sessions',
     cookieSameSite: 'lax',
     storageOptions: {} as CreateStorageOptions,
+    domain: null,
     ipPinning: false as boolean|SessionIpPinningOptions
   },
   api: {
