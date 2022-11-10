@@ -46,8 +46,8 @@ declare interface SessionOptions {
    storageOptions: CreateStorageOptions,
    /**
    * Set the cookie domain
-   * @default 600
-   * @example 30
+   * @default null
+   * @example '.example.com'
    * @type string | null
    */
    domain: string | null
