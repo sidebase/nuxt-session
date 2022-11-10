@@ -44,6 +44,13 @@ declare interface SessionOptions {
     * @docs https://github.com/unjs/unstorage
     */
    storageOptions: CreateStorageOptions,
+   /**
+   * Set the cookie domain
+   * @default 600
+   * @example 30
+   * @type string | null
+   */
+   domain: string | null
 }
 
 declare interface ApiOptions {
@@ -100,6 +107,7 @@ const defaults: ModuleOptions = {
     idLength: 64,
     storePrefix: 'sessions',
     cookieSameSite: 'lax',
+    domain: null,
     storageOptions: {}
   },
   api: {
