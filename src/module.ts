@@ -132,7 +132,7 @@ export default defineNuxtModule<ModuleOptions>({
 
     // 2. Set public and private runtime configuration
     const options = defu(moduleOptions, defaults)
-    options.api.methods = moduleOptions.api.methods.length > 0 ? moduleOptions.api.methods : ['patch', 'delete', 'get', 'post']
+    options.api.methods = Array.isArray(moduleOptions.api.methods) ? moduleOptions.api.methods : ['patch', 'delete', 'get', 'post']
     nuxt.options.runtimeConfig.session = defu(nuxt.options.runtimeConfig.session, options)
     nuxt.options.runtimeConfig.public = defu(nuxt.options.runtimeConfig.public, { session: { api: options.api } })
 
