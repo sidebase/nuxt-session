@@ -45,10 +45,11 @@ declare interface SessionOptions {
     */
    storageOptions: CreateStorageOptions,
    /**
-   * Set the cookie domain
+   * Set the cookie domain for sharing on subdomains. If not include or value is null, the current domain will be set.
    * @default null
    * @example '.example.com'
    * @type string | null
+   * @docs https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#define_where_cookies_are_sent
    */
    domain: string | null
 }
