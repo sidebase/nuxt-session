@@ -115,7 +115,8 @@ const defaults: ModuleOptions = {
     storePrefix: 'sessions',
     cookieSameSite: 'lax',
     storageOptions: {
-      driver: 'memory'
+      driver: 'memory',
+      options: {}
     }
   },
   api: {
