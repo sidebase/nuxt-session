@@ -218,9 +218,11 @@ Here's what the full _default_ module configuration looks like:
     // The session cookie same site policy is `lax`
     cookieSameSite: 'lax',
     // In-memory storage is used (these are `unjs/unstorage` options)
-    storageOptions: {}
+    storageOptions: {},
     // The request-domain is strictly used for the cookie, no sub-domains allowed
-    domain: null
+    domain: null,
+    // Sessions aren't pinned to the user's IP address
+    ipPinning: false
   },
   api: {
     // The API is enabled
@@ -256,10 +258,11 @@ Without further ado, here's some attack cases you can consider and take action a
     - possible mitigations:
         - disable reading of data on the client side by disabling the api or setting `api: { methods: [] }`
         - increase the default sessionId length (although with `64` characters it already is quite long, in 2022)
+        - use the `ipPinning` flag (although this means that everytime the user changes IP address, they'll lose their current session)
 4. stealing session id(s) of client(s)
     - problem: session data can leak
     - possible mitigations:
-        - increase cookie protection, e.g., by setting `session.cookieSameSite: 'stric'` (default: `lax`)
+        - increase cookie protection, e.g., by setting `session.cookieSameSite: 'strict'` (default: `lax`)
         - use very short-lived sessions
         - don't allow session renewal
 

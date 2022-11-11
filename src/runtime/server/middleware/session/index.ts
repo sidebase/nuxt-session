@@ -1,8 +1,10 @@
-import { H3Event, eventHandler, setCookie, parseCookies, deleteCookie } from 'h3'
+import { deleteCookie, eventHandler, H3Event, parseCookies, setCookie } from 'h3'
 import { nanoid } from 'nanoid'
 import dayjs from 'dayjs'
-import type { SameSiteOptions } from '../../../../module'
+import { SameSiteOptions, Session, SessionOptions } from '../../../../types'
 import { dropStorageSession, getStorageSession, setStorageSession } from './storage'
+import { processSessionIp, getHashedIpAddress } from './ipPinning'
+import { SessionExpired } from './exceptions'
 import { useRuntimeConfig } from '#imports'
 
 const SESSION_COOKIE_NAME = 'sessionId'
@@ -16,13 +18,14 @@ const safeSetCookie = (event: H3Event, name: string, value: string) => setCookie
   // Do not send cookies on many cross-site requests to mitigates CSRF and cross-site attacks, see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite#lax
   sameSite: useRuntimeConfig().session.session.cookieSameSite as SameSiteOptions,
   // Set cookie for subdomain
-  domain: useRuntimeConfig().session.session.domain,
+  domain: useRuntimeConfig().session.session.domain
 })
 
-export declare interface Session {
-  id: string
-  createdAt: Date
-  [key: string]: any
+const checkSessionExpirationTime = (session: Session, sessionExpiryInSeconds: number) => {
+  const now = dayjs()
+  if (now.diff(dayjs(session.createdAt), 'seconds') > sessionExpiryInSeconds) {
+    throw new SessionExpired()
+  }
 }
 
 /**
@@ -56,15 +59,19 @@ export const deleteSession = async (event: H3Event) => {
 }
 
 const newSession = async (event: H3Event) => {
-  // Cleanup old session data to avoid leaks
-  await deleteSession(event)
+  const runtimeConfig = useRuntimeConfig()
+  const sessionOptions = runtimeConfig.session.session
 
   // (Re-)Set cookie
-  const sessionId = nanoid(useRuntimeConfig().session.session.idLength)
+  const sessionId = nanoid(sessionOptions.idLength)
   safeSetCookie(event, SESSION_COOKIE_NAME, sessionId)
 
   // Store session data in storage
-  const session: Session = { id: sessionId, createdAt: new Date() }
+  const session: Session = {
+    id: sessionId,
+    createdAt: new Date(),
+    ip: sessionOptions.ipPinning ? await getHashedIpAddress(event) : undefined
+  }
   await setStorageSession(sessionId, session)
 
   return session
@@ -83,24 +90,31 @@ const getSession = async (event: H3Event): Promise<null | Session> => {
     return null
   }
 
-  // 3. Is the session not expired?
-  const sessionExpiryInSeconds = useRuntimeConfig().session.session.expiryInSeconds
-  if (sessionExpiryInSeconds !== null) {
-    const now = dayjs()
-    if (now.diff(dayjs(session.createdAt), 'seconds') > sessionExpiryInSeconds) {
-      return null
+  const runtimeConfig = useRuntimeConfig()
+  const sessionOptions = runtimeConfig.session.session as SessionOptions
+  const sessionExpiryInSeconds = sessionOptions.expiryInSeconds
+
+  try {
+    // 3. Is the session not expired?
+    if (sessionExpiryInSeconds !== null) {
+      checkSessionExpirationTime(session, sessionExpiryInSeconds)
     }
+
+    // 4. Check for IP pinning logic
+    if (sessionOptions.ipPinning) {
+      await processSessionIp(event, session)
+    }
+  } catch {
+    await deleteSession(event) // Cleanup old session data to avoid leaks
+
+    return null
   }
 
   return session
 }
 
 function isSession (shape: unknown): shape is Session {
-  if (typeof shape === 'object' && !!shape && 'id' in shape && 'createdAt' in shape) {
-    return true
-  }
-
-  return false
+  return typeof shape === 'object' && !!shape && 'id' in shape && 'createdAt' in shape
 }
 
 const ensureSession = async (event: H3Event) => {
