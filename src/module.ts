@@ -1,113 +1,17 @@
 import { addImportsDir, addServerHandler, createResolver, defineNuxtModule, useLogger } from '@nuxt/kit'
 import { defu } from 'defu'
-import { BuiltinDriverName, builtinDrivers } from 'unstorage'
-import type { FSStorageOptions } from 'unstorage/dist/drivers/fs'
-import type { KVOptions } from 'unstorage/dist/drivers/cloudflare-kv-binding'
-import type { KVHTTPOptions } from 'unstorage/dist/drivers/cloudflare-kv-http'
-import type { GithubOptions } from 'unstorage/dist/drivers/github'
-import type { HTTPOptions } from 'unstorage/dist/drivers/http'
-import type { OverlayStorageOptions } from 'unstorage/dist/drivers/overlay'
-import type { LocalStorageOptions } from 'unstorage/dist/drivers/localstorage'
-import type { RedisOptions } from 'unstorage/dist/drivers/redis'
-
-export type UnstorageDriverOption = FSStorageOptions | KVOptions | KVHTTPOptions | GithubOptions | HTTPOptions | OverlayStorageOptions | LocalStorageOptions | RedisOptions
-
-export type SameSiteOptions = 'lax' | 'strict' | 'none'
-export type SupportedSessionApiMethods = 'patch' | 'delete' | 'get' | 'post'
-
-interface StorageOptions {
-  driver: BuiltinDriverName,
-  options?: UnstorageDriverOption
-}
-
-declare interface SessionOptions {
-/**
-   * Set the session duration in seconds. Once the session expires, a new one with a new id will be created. Set to `null` for infinite sessions
-   * @default 600
-   * @example 30
-   * @type number | null
-   */
-  expiryInSeconds: number | null
-   /**
-    * How many characters the random session id should be long
-    * @default 64
-    * @example 128
-    * @type number
-    */
-  idLength: number
-   /**
-    * What prefix to use to store session information via `unstorage`
-    * @default "sessions"
-    * @example "userSessions"
-    * @type number
-    * @docs https://github.com/unjs/unstorage
-    */
-   storePrefix: string
-   /**
-    * When to attach session cookie to requests
-    * @default 'lax'
-    * @example 'strict'
-    * @type SameSiteOptions
-    * @docs https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite
-    */
-   cookieSameSite: SameSiteOptions
-   /**
-    * Driver configuration for session-storage. Per default in-memory storage is used
-    * @default { driver: 'memory', options: {} }
-    * @example { driver: 'redis', options: {url: 'localhost:6379'} }
-    * @docs https://nitro.unjs.io/guide/introduction/storage
-    */
-   storageOptions: StorageOptions,
-}
-
-declare interface ApiOptions {
-  /**
-   * Whether to enable the session API endpoints that allow read, update and delete operations from the client side. Use `/api/session` to access the endpoints.
-   * @default true
-   * @example false
-   * @type boolean
-   */
-   isEnabled: boolean
-   /**
-    * Configure which session API methods are enabled. All api methods are enabled by default. Restricting the enabled methods can be useful if you want to allow the client to read session-data but not modify it. Passing
-    * an empty array will result in all API methods being registered. Disable the api via the `api.isEnabled` option.
-    * @default []
-    * @example ['get']
-    * @type SupportedSessionApiMethods[]
-    */
-   methods: SupportedSessionApiMethods[]
-   /**
-    * Base path of the session api.
-    * @default /api/session
-    * @example /_session
-    * @type string
-    */
-   basePath: string
-}
-
-export interface ModuleOptions {
-  /**
-   * Whether to enable the module
-   * @default true
-   * @example true
-   * @type boolean
-   */
-  isEnabled: boolean,
-  /**
-   * Configure session-behvaior
-   * @type SessionOptions
-   */
-  session: Partial<SessionOptions>
-  /**
-   * Configure session-api and composable-behavior
-   * @type ApiOptions
-   */
-  api: Partial<ApiOptions>
-}
+import { builtinDrivers } from 'unstorage'
+import type {
+  FilledModuleOptions,
+  ModuleOptions,
+  ModulePublicRuntimeConfig,
+  SessionIpPinningOptions,
+  SupportedSessionApiMethods
+} from './types'
 
 const PACKAGE_NAME = 'nuxt-session'
 
-const defaults: ModuleOptions = {
+const defaults: FilledModuleOptions = {
   isEnabled: true,
   session: {
     expiryInSeconds: 60 * 10,
@@ -117,14 +21,16 @@ const defaults: ModuleOptions = {
     storageOptions: {
       driver: 'memory',
       options: {}
-    }
+    },
+    domain: null,
+    ipPinning: false as boolean|SessionIpPinningOptions
   },
   api: {
     isEnabled: true,
-    methods: [],
+    methods: [] as SupportedSessionApiMethods[],
     basePath: '/api/session'
   }
-}
+} as const
 
 export default defineNuxtModule<ModuleOptions>({
   meta: {
@@ -148,15 +54,21 @@ export default defineNuxtModule<ModuleOptions>({
     logger.info('Setting up sessions...')
 
     // 2. Set public and private runtime configuration
-    const options = defu(moduleOptions, defaults)
+    const options: FilledModuleOptions = defu(moduleOptions, defaults)
     options.api.methods = moduleOptions.api.methods.length > 0 ? moduleOptions.api.methods : ['patch', 'delete', 'get', 'post']
-    nuxt.options.runtimeConfig.session = defu(nuxt.options.runtimeConfig.session, options)
-    nuxt.options.runtimeConfig.public = defu(nuxt.options.runtimeConfig.public, { session: { api: options.api } })
+    // @ts-ignore TODO: Fix this `nuxi prepare` bug (see https://github.com/nuxt/framework/issues/8728)
+    nuxt.options.runtimeConfig.session = defu(nuxt.options.runtimeConfig.session, options) as FilledModuleOptions
+
+    const publicConfig: ModulePublicRuntimeConfig = { session: { api: options.api } }
+    nuxt.options.runtimeConfig.public = defu(nuxt.options.runtimeConfig.public, publicConfig)
+
     // setup unstorage
-    nuxt.options.nitro.virtual = defu(nuxt.options.nitro.virtual,
-      {
-        '#session-driver': `export { default } from '${builtinDrivers[options.session.storageOptions.driver]}'`
-      })
+    nuxt.options.nitro.virtual = defu(nuxt.options.nitro.virtual, {
+      '#session-driver': `export { default } from '${
+        builtinDrivers[options.session.storageOptions.driver]
+      }'`
+    })
+
     // 3. Locate runtime directory and transpile module
     const { resolve } = createResolver(import.meta.url)
 
@@ -186,3 +98,5 @@ export default defineNuxtModule<ModuleOptions>({
     logger.success('Session setup complete')
   }
 })
+
+export * from './types'

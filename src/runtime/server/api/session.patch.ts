@@ -6,7 +6,7 @@ export const checkIfObjectAndContainsIllegalKeys = (shape: unknown): shape is Ob
   }
 
   // see https://stackoverflow.com/a/39283005 for this usage
-  return Object.prototype.hasOwnProperty.call(shape, 'id') || Object.prototype.hasOwnProperty.call(shape, 'createdAt')
+  return !!['id', 'createdAt', 'ip'].find(key => Object.prototype.hasOwnProperty.call(shape, key))
 }
 
 export default eventHandler(async (event) => {

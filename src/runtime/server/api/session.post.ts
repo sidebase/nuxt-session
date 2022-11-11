@@ -1,4 +1,4 @@
-import { eventHandler, readBody } from 'h3'
+import { createError, eventHandler, readBody } from 'h3'
 import { checkIfObjectAndContainsIllegalKeys } from './session.patch'
 
 export default eventHandler(async (event) => {
@@ -9,9 +9,10 @@ export default eventHandler(async (event) => {
 
   // Fully overwrite the session with body data, only keep sessions own properties (id, createdAt)
   event.context.session = {
+    ...body,
     id: event.context.session.id,
     createdAt: event.context.session.createdAt,
-    ...body
+    ip: event.context.session.ip
   }
 
   return event.context.session
