@@ -239,7 +239,7 @@ Here's what the full _default_ module configuration looks like:
 ```
 
 ```
-### Using a different storage driver
+#### Using a different storage driver
 
 You can use any stroage driver supported by unstorage. For example, this will use the redis driver instead of the default memory driver.
 ```ts
