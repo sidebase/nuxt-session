@@ -59,7 +59,7 @@ The `nuxt-session` library provide many helpers to interact with the session fro
     - `DELETE /api/session`: Delete the current session
     - `POST /api/session`: Overwrite the current session data
     - `PATCH /api/session`: Add to the current session data
-- ✔️ Storage via [unjs/unstorage](https://github.com/unjs/unstorage) - use memory, redis, fs, cloudflare-kv, ... to store your session data
+- ✔️ Storage via [unjs/unstorage](https://github.com/unjs/unstorage) - use memory, redis, fs, cloudflare-kv, ... drivers to store your session data
 - ✔️ Automatic session and storage cleanup on expiry
 
 Use the module-playground (see playground below) to play around with the module. Read the [documentation](#documentation) if you want to learn about the library without starting your local environment.
@@ -98,10 +98,13 @@ We call this "stay" that lasts as long as the above criteria are met a session.
 Below we describe:
 1. [Session data](#session-data)
     - [Client-side access](#client-side-access)
+        - [Advanced Client-Side Usage](#advanced-client-side-usage)
     - [Server-side access](#server-side-access)
-2. [How to configure session-storage](#storage-backends)
-3. [Configuration](#configuration)
+2. [Configuration](#configuration)
+3. [Storage Drivers](#storage-drivers)
+    - [Example of using a different storage driver](#example-of-using-a-different-storage-driver)
 4. [Security](#security)
+5. [Development](#development)
 
 ### Session Data
 
@@ -193,14 +196,6 @@ declare interface Session {
 
 In theory you can manipulate this data on the server side if you want to. If you do this, the session will likely become invalid in the process, so proceed at your own risk!
 
-### Storage Backends
-
-`nuxt-session` allows you to use different storage backends. A storage backend is something like your server memory, a redis database, the file-system of your server, ... Supporting these backend is possible by using [unjs/unstorage](https://github.com/unjs/unstorage) for storage management. This library connects to the different backends it supports with a unified interface.
-
-You can configure the storage backend using the `session.session.storageOptions` configuration option of the `nuxt-session` module. By default `memory` is used to store the sessions. This has some advantages like speed and easy setup, but some disadvantages like missing persistency (if your server crashes, the sessions are gone!) and possible exploits like setting millions of sessions trying to exhaust your server-memory or saving large amounts of data into the session that your server cannot handle.
-
-Check out here what storage backends are supported and how to configure them: https://github.com/unjs/unstorage#drivers
-
 ### Configuration
 
 Here's what the full _default_ module configuration looks like:
@@ -238,26 +233,32 @@ Here's what the full _default_ module configuration looks like:
 }
 ```
 
-```
-#### Using a different storage driver
+### Storage Drivers
 
-You can use any stroage driver supported by unstorage. For example, this will use the redis driver instead of the default memory driver.
+`nuxt-session` allows you to use different storage drivers. A storage driver is something like your server memory, a redis database, the file-system of your server, ... Supporting these drivers is possible by using [unjs/unstorage](https://github.com/unjs/unstorage) for storage management. This library connects to the different drivers it supports with a unified interface.
+
+You can configure the storage driver using the `session.session.storageOptions` configuration option of the `nuxt-session` module. By default `memory` is used to store the sessions. This has some advantages like speed and easy setup, but some disadvantages like missing persistency (if your server crashes, the sessions are gone!) and possible exploits like setting millions of sessions trying to exhaust your server-memory or saving large amounts of data into the session that your server cannot handle.
+
+Check out here what storage drivers are supported and how to configure them: https://github.com/unjs/unstorage#drivers
+
+#### Example of using a different storage driver
+
+You can use any storage driver supported by [unjs/unstorage](https://github.com/unjs/unstorage). For example, here is how you can configure the module to use the `redis` driver:
 ```ts
-//nuxt.config.ts
-{
-    ...,
+// file: ~/nuxt.config.ts
+export default defineNuxtConfig({
+  modules: ['@sidebase/nuxt-session'],
+  session: {
     session: {
-        session:{
-            storageOptions:{
-                driver: 'redis',
-                options: {
-                    url: 'redis://localhost:6379'
-                }
-            }
+      storageOptions: {
+        driver: 'redis',
+        options: {
+          url: 'redis://localhost:6379'
         }
+      }
     }
-}
-
+  }
+})
 ```
 
 ### Security
@@ -277,7 +278,7 @@ Without further ado, here's some attack cases you can consider and take action a
     - problems: Denial-of-Service by server-ressource exhaustion (bandwidth, cpu, memory)
     - possible mitigations:
         - add authentication and possibly authorization to your app
-        - use `redis` as a storage backend and set data to expire automatically
+        - use `redis` as a storage driver and set data to expire automatically
 3. guessing correct session ids
     - problems: session data can leak
     - possible mitigations:
@@ -293,7 +294,7 @@ Without further ado, here's some attack cases you can consider and take action a
 
 A last reminder: This library was not written by crypto- or security-experts. So please proceed at your own risk, inspect the code if you want to and open issues / pull requests where you see room for improvement. If you want to file a security-concern privately, please send an email to `support@sidestream.tech` with the subject saying "SECURITY nuxt-session" and we'll look into your request ASAP.
 
-## Development
+### Development
 
 - Run `npm run dev:prepare` to generate type stubs.
 - Use `npm run dev` to start [the module playground](./playground) in development mode.
