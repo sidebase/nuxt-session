@@ -1,6 +1,6 @@
 import { addImportsDir, addServerHandler, createResolver, defineNuxtModule, useLogger } from '@nuxt/kit'
-import { CreateStorageOptions } from 'unstorage'
 import { defu } from 'defu'
+import { builtinDrivers } from 'unstorage'
 import type {
   FilledModuleOptions,
   ModuleOptions,
@@ -18,7 +18,10 @@ const defaults: FilledModuleOptions = {
     idLength: 64,
     storePrefix: 'sessions',
     cookieSameSite: 'lax',
-    storageOptions: {} as CreateStorageOptions,
+    storageOptions: {
+      driver: 'memory',
+      options: {}
+    },
     domain: null,
     ipPinning: false as boolean|SessionIpPinningOptions
   },
@@ -58,6 +61,13 @@ export default defineNuxtModule<ModuleOptions>({
 
     const publicConfig: ModulePublicRuntimeConfig = { session: { api: options.api } }
     nuxt.options.runtimeConfig.public = defu(nuxt.options.runtimeConfig.public, publicConfig)
+
+    // setup unstorage
+    nuxt.options.nitro.virtual = defu(nuxt.options.nitro.virtual, {
+      '#session-driver': `export { default } from '${
+        builtinDrivers[options.session.storageOptions.driver]
+      }'`
+    })
 
     // 3. Locate runtime directory and transpile module
     const { resolve } = createResolver(import.meta.url)

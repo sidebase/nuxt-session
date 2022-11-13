@@ -1,8 +1,22 @@
-import type { CreateStorageOptions } from 'unstorage'
+import type { BuiltinDriverName, CreateStorageOptions } from 'unstorage'
+import type { FSStorageOptions } from 'unstorage/dist/drivers/fs'
+import type { KVOptions } from 'unstorage/dist/drivers/cloudflare-kv-binding'
+import type { KVHTTPOptions } from 'unstorage/dist/drivers/cloudflare-kv-http'
+import type { GithubOptions } from 'unstorage/dist/drivers/github'
+import type { HTTPOptions } from 'unstorage/dist/drivers/http'
+import type { OverlayStorageOptions } from 'unstorage/dist/drivers/overlay'
+import type { LocalStorageOptions } from 'unstorage/dist/drivers/localstorage'
+import type { RedisOptions } from 'unstorage/dist/drivers/redis'
 
 export type SameSiteOptions = 'lax' | 'strict' | 'none'
 export type SupportedSessionApiMethods = 'patch' | 'delete' | 'get' | 'post'
 
+export type UnstorageDriverOption = FSStorageOptions | KVOptions | KVHTTPOptions | GithubOptions | HTTPOptions | OverlayStorageOptions | LocalStorageOptions | RedisOptions
+
+export interface StorageOptions {
+  driver: BuiltinDriverName,
+  options?: UnstorageDriverOption
+}
 export interface SessionIpPinningOptions {
   /**
    * The name of the HTTP header used to retrieve the forwarded (real) IP address of the user
@@ -45,12 +59,11 @@ export interface SessionOptions {
   cookieSameSite: SameSiteOptions
   /**
    * Driver configuration for session-storage. Per default in-memory storage is used
-   * @default {}
-   * @example { driver: redisDriver({ base:  'storage:' }) }
-   * @type CreateStorageOptions
+   * @default { driver: 'memory', options: {} }
+   * @example { driver: 'redis', options: {url: 'redis://localhost:6739' } }
    * @docs https://github.com/unjs/unstorage
    */
-  storageOptions: CreateStorageOptions,
+  storageOptions: StorageOptions,
   /**
    * Set the domain the session cookie will be receivable by. Setting `domain: null` results in setting the domain the cookie is initially set on. Specifying a domain will allow the domain and all its sub-domains.
    * @default null
