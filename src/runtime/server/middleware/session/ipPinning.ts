@@ -1,8 +1,8 @@
 import * as argon2 from 'argon2'
 import { H3Event } from 'h3'
-import { useRuntimeConfig } from '#app'
 import { Session } from '../../../../types'
 import { IpMissingFromSession, IpMismatch } from './exceptions'
+import { useRuntimeConfig } from '#imports'
 
 const argon2Options = {
   // cryptographically-secure salt is generated automatically
