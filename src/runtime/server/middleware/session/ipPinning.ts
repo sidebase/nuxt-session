@@ -1,12 +1,12 @@
-import { argon2id, hash, verify } from 'argon2'
+import * as argon2 from 'argon2'
 import { H3Event } from 'h3'
-import { useRuntimeConfig } from '#app'
 import { Session } from '../../../../types'
 import { IpMissingFromSession, IpMismatch } from './exceptions'
+import { useRuntimeConfig } from '#imports'
 
 const argon2Options = {
   // cryptographically-secure salt is generated automatically
-  type: argon2id, // resistant against GPU & tradeoff attacks
+  type: argon2.argon2id, // resistant against GPU & tradeoff attacks
   hashLength: 60
 }
 
@@ -17,14 +17,14 @@ const argon2Options = {
 export const hashIpAddress = (ip: string | undefined): Promise<string | undefined> =>
   !ip
     ? Promise.resolve(undefined)
-    : hash(ip, argon2Options)
+    : argon2.hash(ip, argon2Options)
 
 /**
  * Check that the given (raw) IP address and the hashed IP address match
  * @param ip string|undefined The IP address to verify
  * @param ipHash string|undefined The (hashed) IP address to test against
  */
-export const ipAddressesMatch = (ip: string | undefined, ipHash: string | undefined): Promise<boolean> => (!ip && !ipHash) ? Promise.resolve(false) : verify(ipHash, ip, argon2Options)
+export const ipAddressesMatch = (ip: string | undefined, ipHash: string | undefined): Promise<boolean> => (!ip && !ipHash) ? Promise.resolve(false) : argon2.verify(ipHash, ip, argon2Options)
 
 /**
  * Extract the IP address from an HTTP header
@@ -58,7 +58,7 @@ export const getRequestIpAddress = ({ req }: H3Event): string | undefined => {
   return req.socket.remoteAddress
 }
 
-export const getHashedIpAddress = (event: H3Event): Promise<string|undefined> => {
+export const getHashedIpAddress = (event: H3Event): Promise<string | undefined> => {
   return hashIpAddress(getRequestIpAddress(event))
 }
 
