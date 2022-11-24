@@ -8,18 +8,26 @@ import { SessionExpired } from './exceptions'
 import { useRuntimeConfig } from '#imports'
 
 const SESSION_COOKIE_NAME = 'sessionId'
-const safeSetCookie = (event: H3Event, name: string, value: string) => setCookie(event, name, value, {
-  // Max age of cookie in seconds
-  maxAge: useRuntimeConfig().session.session.expiryInSeconds,
-  // Only send cookie via HTTPs to mitigate man-in-the-middle attacks
-  secure: true,
-  // Only send cookie via HTTP requests, do not allow access of cookie from JS to mitigate XSS attacks
-  httpOnly: true,
-  // Do not send cookies on many cross-site requests to mitigates CSRF and cross-site attacks, see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite#lax
-  sameSite: useRuntimeConfig().session.session.cookieSameSite as SameSiteOptions,
-  // Set cookie for subdomain
-  domain: useRuntimeConfig().session.session.domain
-})
+const safeSetCookie = (event: H3Event, name: string, value: string, date: Date) => {
+  const sessionConfig = useRuntimeConfig().session.session
+  const expirationDate = sessionConfig.expiryInSeconds ? date : undefined
+  if (expirationDate) {
+    expirationDate.setSeconds(expirationDate.getSeconds() + sessionConfig.expiryInSeconds)
+  }
+
+  setCookie(event, name, value, {
+    // Set cookie expiration date to now + expiryInSeconds
+    expires: expirationDate,
+    // Only send cookie via HTTPs to mitigate man-in-the-middle attacks
+    secure: true,
+    // Only send cookie via HTTP requests, do not allow access of cookie from JS to mitigate XSS attacks
+    httpOnly: true,
+    // Do not send cookies on many cross-site requests to mitigates CSRF and cross-site attacks, see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite#lax
+    sameSite: sessionConfig.cookieSameSite as SameSiteOptions,
+    // Set cookie for subdomain
+    domain: sessionConfig.domain
+  })
+}
 
 const checkSessionExpirationTime = (session: Session, sessionExpiryInSeconds: number) => {
   const now = dayjs()
@@ -61,15 +69,16 @@ export const deleteSession = async (event: H3Event) => {
 const newSession = async (event: H3Event) => {
   const runtimeConfig = useRuntimeConfig()
   const sessionOptions = runtimeConfig.session.session
+  const now = new Date()
 
   // (Re-)Set cookie
   const sessionId = nanoid(sessionOptions.idLength)
-  safeSetCookie(event, SESSION_COOKIE_NAME, sessionId)
+  safeSetCookie(event, SESSION_COOKIE_NAME, sessionId, now)
 
   // Store session data in storage
   const session: Session = {
     id: sessionId,
-    createdAt: new Date(),
+    createdAt: now,
     ip: sessionOptions.ipPinning ? await getHashedIpAddress(event) : undefined
   }
   await setStorageSession(sessionId, session)
@@ -113,14 +122,24 @@ const getSession = async (event: H3Event): Promise<null | Session> => {
   return session
 }
 
+const touchSession = (session: Session, event: H3Event) => {
+  const now = new Date()
+  session.createdAt = now
+  safeSetCookie(event, SESSION_COOKIE_NAME, session.id, now)
+}
+
 function isSession (shape: unknown): shape is Session {
   return typeof shape === 'object' && !!shape && 'id' in shape && 'createdAt' in shape
 }
 
 const ensureSession = async (event: H3Event) => {
+  const sessionConfig = useRuntimeConfig().session.session
+
   let session = await getSession(event)
   if (!session) {
     session = await newSession(event)
+  } else if (sessionConfig.rolling) {
+    touchSession(session, event)
   }
 
   event.context.sessionId = session.id
