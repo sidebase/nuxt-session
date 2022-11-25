@@ -299,7 +299,7 @@ A last reminder: This library was not written by crypto- or security-experts. So
 - Run `npm run dev:prepare` to generate type stubs.
 - Use `npm run dev` to start [the module playground](./playground) in development mode.
 - Run `npm run lint` to run eslint
-- Run `npm run type` to run typescheck via tsc
+- Run `npm run types` to run typescheck via tsc
 
 
 
