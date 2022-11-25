@@ -1,0 +1,8 @@
+sidebase/nuxt-session:
+  - .docs/content
+  - .docs/public
+sidebase/docs:
+  - source: .docs/content/
+    dest: content/nuxt-session/
+  - source: .docs/public/
+    dest: public/
