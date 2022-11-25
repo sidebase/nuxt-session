@@ -5,6 +5,7 @@ import { SameSiteOptions, Session, SessionOptions } from '../../../../types'
 import { dropStorageSession, getStorageSession, setStorageSession } from './storage'
 import { processSessionIp, getHashedIpAddress } from './ipPinning'
 import { SessionExpired } from './exceptions'
+import { resEndProxy } from './resEndProxy'
 import { useRuntimeConfig } from '#imports'
 
 const SESSION_COOKIE_NAME = 'sessionId'
@@ -58,7 +59,7 @@ export const deleteSession = async (event: H3Event) => {
   deleteCookie(event, SESSION_COOKIE_NAME)
 }
 
-const newSession = async (event: H3Event) => {
+const newSession = async (event: H3Event, copyContextSession?: boolean) => {
   const runtimeConfig = useRuntimeConfig()
   const sessionOptions = runtimeConfig.session.session
 
@@ -71,6 +72,10 @@ const newSession = async (event: H3Event) => {
     id: sessionId,
     createdAt: new Date(),
     ip: sessionOptions.ipPinning ? await getHashedIpAddress(event) : undefined
+  }
+  // Copy the session object from the event context to the new session
+  if (copyContextSession) {
+    Object.assign(session, event.context.session)
   }
   await setStorageSession(sessionId, session)
 
@@ -118,9 +123,23 @@ function isSession (shape: unknown): shape is Session {
 }
 
 const ensureSession = async (event: H3Event) => {
+  const sessionConfig = useRuntimeConfig().session.session
+
   let session = await getSession(event)
   if (!session) {
-    session = await newSession(event)
+    if (sessionConfig.saveUninitialized) {
+      session = await newSession(event)
+    } else {
+      // 1. Create an empty session object
+      event.context.session = {}
+      // 2. Create a new session if the object has been modified by any event handler
+      resEndProxy(event.res, async () => {
+        if (Object.keys(event.context.session).length) {
+          await newSession(event, true)
+        }
+      })
+      return null
+    }
   }
 
   event.context.sessionId = session.id
