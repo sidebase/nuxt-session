@@ -7,6 +7,14 @@ import { processSessionIp, getHashedIpAddress } from './ipPinning'
 import { SessionExpired } from './exceptions'
 import { useRuntimeConfig } from '#imports'
 
+console.log('registering 1')
+
+declare module 'h3' {
+  interface H3EventContext {
+    session: Session
+  }
+}
+
 const SESSION_COOKIE_NAME = 'sessionId'
 const safeSetCookie = (event: H3Event, name: string, value: string) => setCookie(event, name, value, {
   // Max age of cookie in seconds

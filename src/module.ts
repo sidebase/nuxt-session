@@ -77,13 +77,13 @@ export default defineNuxtModule<ModuleOptions>({
     // 3. Locate runtime directory and transpile module
     const { resolve } = createResolver(import.meta.url)
 
-    // 4. Setup middleware, use `.unshift` to ensure (reasonably well) that the session middleware is first
-    const handler = resolve('./runtime/server/middleware/session')
+    // 4. Setup middleware
+    const handler = resolve('./runtime/server/middleware/0.session')
     const serverHandler = {
       middleware: true,
       handler
     }
-    nuxt.options.serverHandlers.unshift(serverHandler)
+    addServerHandler(serverHandler)
 
     // 5. Register desired session API endpoints
     if (options.api.isEnabled) {
