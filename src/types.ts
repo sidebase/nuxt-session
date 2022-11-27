@@ -1,4 +1,4 @@
-import type { BuiltinDriverName, CreateStorageOptions } from 'unstorage'
+import type { BuiltinDriverName } from 'unstorage'
 import type { FSStorageOptions } from 'unstorage/dist/drivers/fs'
 import type { KVOptions } from 'unstorage/dist/drivers/cloudflare-kv-binding'
 import type { KVHTTPOptions } from 'unstorage/dist/drivers/cloudflare-kv-http'
