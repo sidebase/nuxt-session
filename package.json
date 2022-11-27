@@ -26,21 +26,23 @@
     "dev:prepare": "nuxt-module-build --stub && nuxi prepare playground",
     "lint": "eslint . --max-warnings=0",
     "types": "tsc --noEmit",
-    "build": "nuxi build"
+    "build:module": "nuxi build",
+    "build:playground": "nuxi build playground",
+    "start:playground": "node playground/.output/server/index.mjs"
   },
   "dependencies": {
-    "@nuxt/kit": "^3.0.0-rc.12",
-    "argon2": "^0.30.1",
-    "dayjs": "^1.11.5",
+    "@nuxt/kit": "^3.0.0",
+    "argon2": "^0.30.2",
+    "dayjs": "^1.11.6",
     "defu": "^6.1.0",
-    "h3": "^0.8.5",
-    "unstorage": "^0.6.0"
+    "h3": "^1.0.1",
+    "unstorage": "^1.0.1"
   },
   "devDependencies": {
-    "@nuxt/module-builder": "latest",
-    "@nuxt/schema": "^3.0.0-rc.12",
-    "@nuxtjs/eslint-config-typescript": "latest",
-    "eslint": "latest",
-    "nuxt": "^3.0.0-rc.12"
+    "@nuxt/module-builder": "^0.2.1",
+    "@nuxt/schema": "^3.0.0",
+    "@nuxtjs/eslint-config-typescript": "^12.0.0",
+    "eslint": "8.28",
+    "nuxt": "^3.0.0"
   }
 }

@@ -54,8 +54,13 @@ export default defineNuxtModule<ModuleOptions>({
     logger.info('Setting up sessions...')
 
     // 2. Set public and private runtime configuration
-    const options: FilledModuleOptions = defu(moduleOptions, defaults)
-    options.api.methods = moduleOptions.api.methods.length > 0 ? moduleOptions.api.methods : ['patch', 'delete', 'get', 'post']
+    const options = defu(moduleOptions, defaults)
+    if (moduleOptions.api.methods && moduleOptions.api.methods.length > 0) {
+      options.api.methods = moduleOptions.api.methods
+    } else {
+      options.api.methods = ['patch', 'delete', 'get', 'post']
+    }
+
     // @ts-ignore TODO: Fix this `nuxi prepare` bug (see https://github.com/nuxt/framework/issues/8728)
     nuxt.options.runtimeConfig.session = defu(nuxt.options.runtimeConfig.session, options) as FilledModuleOptions
 
