@@ -220,7 +220,9 @@ Here's what the full _default_ module configuration looks like:
     // The request-domain is strictly used for the cookie, no sub-domains allowed
     domain: null,
     // Sessions aren't pinned to the user's IP address
-    ipPinning: false
+    ipPinning: false,
+    // Uninitialized, resp. unmodified sessions are saved to the store, so session cookies are set at the first response
+    saveUninitialized: true
   },
   api: {
     // The API is enabled
