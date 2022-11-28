@@ -23,7 +23,8 @@ const defaults: FilledModuleOptions = {
       options: {}
     },
     domain: null,
-    ipPinning: false as boolean|SessionIpPinningOptions
+    ipPinning: false as boolean|SessionIpPinningOptions,
+    resave: true
   },
   api: {
     isEnabled: true,
