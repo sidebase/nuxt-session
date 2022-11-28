@@ -1,7 +1,8 @@
 import { deleteCookie, eventHandler, H3Event, parseCookies, setCookie } from 'h3'
 import { nanoid } from 'nanoid'
 import dayjs from 'dayjs'
-import { SameSiteOptions, Session, SessionOptions } from '../../../../types'
+import equal from 'fast-deep-equal'
+import { SameSiteOptions, Session, SessionOptions, SessionContent } from '../../../../types'
 import { dropStorageSession, getStorageSession, setStorageSession } from './storage'
 import { processSessionIp, getHashedIpAddress } from './ipPinning'
 import { SessionExpired } from './exceptions'
@@ -59,7 +60,7 @@ export const deleteSession = async (event: H3Event) => {
   deleteCookie(event, SESSION_COOKIE_NAME)
 }
 
-const newSession = async (event: H3Event, copyContextSession?: boolean) => {
+const newSession = async (event: H3Event, sessionContent?: SessionContent) => {
   const runtimeConfig = useRuntimeConfig()
   const sessionOptions = runtimeConfig.session.session
 
@@ -73,13 +74,21 @@ const newSession = async (event: H3Event, copyContextSession?: boolean) => {
     createdAt: new Date(),
     ip: sessionOptions.ipPinning ? await getHashedIpAddress(event) : undefined
   }
-  // Copy the session object from the event context to the new session
-  if (copyContextSession) {
-    Object.assign(session, event.context.session)
+  if (sessionContent) {
+    Object.assign(session, sessionContent)
   }
   await setStorageSession(sessionId, session)
 
   return session
+}
+
+const newSessionIfModified = (event: H3Event, sessionContent: SessionContent) => {
+  const source = { ...sessionContent }
+  resEndProxy(event.res, async () => {
+    if (!equal(sessionContent, source)) {
+      await newSession(event, sessionContent)
+    }
+  })
 }
 
 const getSession = async (event: H3Event): Promise<null | Session> => {
@@ -130,14 +139,10 @@ const ensureSession = async (event: H3Event) => {
     if (sessionConfig.saveUninitialized) {
       session = await newSession(event)
     } else {
-      // 1. Create an empty session object
+      // 1. Create an empty session object in the event context
       event.context.session = {}
       // 2. Create a new session if the object has been modified by any event handler
-      resEndProxy(event.res, async () => {
-        if (Object.keys(event.context.session).length) {
-          await newSession(event, true)
-        }
-      })
+      newSessionIfModified(event, event.context.session)
       return null
     }
   }

@@ -174,3 +174,7 @@ export declare interface Session {
 
   [key: string]: any;
 }
+
+export declare interface SessionContent {
+  [key: string]: any;
+}
