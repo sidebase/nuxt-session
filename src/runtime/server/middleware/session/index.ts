@@ -130,7 +130,7 @@ const ensureSession = async (event: H3Event) => {
 }
 
 export default eventHandler(async (event: H3Event) => {
-  const sessionConfig = useRuntimeConfig().session.session
+  const sessionOptions = useRuntimeConfig().session.session as SessionOptions
 
   // 1. Ensure that a session is present by either loading or creating one
   const session = await ensureSession(event)
@@ -145,7 +145,7 @@ export default eventHandler(async (event: H3Event) => {
       return
     }
 
-    if (sessionConfig.resave || !equal(event.context.session, source)) {
+    if (sessionOptions.resave || !equal(event.context.session, source)) {
       await setStorageSession(session.id, event.context.session)
     }
   })
