@@ -96,7 +96,14 @@ export interface SessionOptions {
    * @example false
    * @type boolean
    */
-  saveUninitialized: boolean
+  saveUninitialized: boolean,
+  /**
+    * Forces the session to be saved back to the session store, even if the session was never modified during the request.
+    * @default true
+    * @example false
+    * @type boolean
+    */
+  resave: boolean
 }
 
 export interface ApiOptions {

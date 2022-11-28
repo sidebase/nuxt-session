@@ -224,7 +224,9 @@ Here's what the full _default_ module configuration looks like:
     // Expiration of the sessions are not reset to the original expiryInSeconds on every request
     rolling: false,
     // Uninitialized, resp. unmodified sessions are saved to the store, so session cookies are set at the first response
-    saveUninitialized: true
+    saveUninitialized: true,
+    // Sessions are saved to the store, even if they were never modified during the request
+    resave: true
   },
   api: {
     // The API is enabled

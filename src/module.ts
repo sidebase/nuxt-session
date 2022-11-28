@@ -25,7 +25,8 @@ const defaults: FilledModuleOptions = {
     domain: null,
     ipPinning: false as boolean|SessionIpPinningOptions,
     rolling: false,
-    saveUninitialized: true
+    saveUninitialized: true,
+    resave: true
   },
   api: {
     isEnabled: true,
