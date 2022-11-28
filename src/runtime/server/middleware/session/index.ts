@@ -62,7 +62,7 @@ export const deleteSession = async (event: H3Event) => {
 
 const newSession = async (event: H3Event, sessionContent?: SessionContent) => {
   const runtimeConfig = useRuntimeConfig()
-  const sessionOptions = runtimeConfig.session.session
+  const sessionOptions = runtimeConfig.session.session as SessionOptions
 
   // (Re-)Set cookie
   const sessionId = nanoid(sessionOptions.idLength)
@@ -132,11 +132,11 @@ function isSession (shape: unknown): shape is Session {
 }
 
 const ensureSession = async (event: H3Event) => {
-  const sessionConfig = useRuntimeConfig().session.session
+  const sessionOptions = useRuntimeConfig().session.session as SessionOptions
 
   let session = await getSession(event)
   if (!session) {
-    if (sessionConfig.saveUninitialized) {
+    if (sessionOptions.saveUninitialized) {
       session = await newSession(event)
     } else {
       // 1. Create an empty session object in the event context
