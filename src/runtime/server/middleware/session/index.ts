@@ -8,12 +8,11 @@ import { SessionExpired } from './exceptions'
 import { useRuntimeConfig } from '#imports'
 
 const SESSION_COOKIE_NAME = 'sessionId'
-const safeSetCookie = (event: H3Event, name: string, value: string, date: Date) => {
+const safeSetCookie = (event: H3Event, name: string, value: string, createdAt: Date) => {
   const sessionConfig = useRuntimeConfig().session.session
-  const expirationDate = sessionConfig.expiryInSeconds ? date : undefined
-  if (expirationDate) {
-    expirationDate.setSeconds(expirationDate.getSeconds() + sessionConfig.expiryInSeconds)
-  }
+  const expirationDate = sessionConfig.expiryInSeconds
+    ? new Date(createdAt.getTime() + sessionConfig.expiryInSeconds * 1000)
+    : undefined
 
   setCookie(event, name, value, {
     // Set cookie expiration date to now + expiryInSeconds
@@ -122,10 +121,10 @@ const getSession = async (event: H3Event): Promise<null | Session> => {
   return session
 }
 
-const touchSession = (session: Session, event: H3Event) => {
+const updateSessionExpirationDate = (session: Session, event: H3Event) => {
   const now = new Date()
-  session.createdAt = now
   safeSetCookie(event, SESSION_COOKIE_NAME, session.id, now)
+  return { ...session, createdAt: now }
 }
 
 function isSession (shape: unknown): shape is Session {
@@ -139,7 +138,7 @@ const ensureSession = async (event: H3Event) => {
   if (!session) {
     session = await newSession(event)
   } else if (sessionConfig.rolling) {
-    touchSession(session, event)
+    session = updateSessionExpirationDate(session, event)
   }
 
   event.context.sessionId = session.id
