@@ -9,9 +9,9 @@ import { useRuntimeConfig } from '#imports'
 
 const SESSION_COOKIE_NAME = 'sessionId'
 const safeSetCookie = (event: H3Event, name: string, value: string, createdAt: Date) => {
-  const sessionConfig = useRuntimeConfig().session.session
-  const expirationDate = sessionConfig.expiryInSeconds
-    ? new Date(createdAt.getTime() + sessionConfig.expiryInSeconds * 1000)
+  const sessionOptions = useRuntimeConfig().session.session as SessionOptions
+  const expirationDate = sessionOptions.expiryInSeconds
+    ? new Date(createdAt.getTime() + sessionOptions.expiryInSeconds * 1000)
     : undefined
 
   setCookie(event, name, value, {
@@ -22,9 +22,9 @@ const safeSetCookie = (event: H3Event, name: string, value: string, createdAt: D
     // Only send cookie via HTTP requests, do not allow access of cookie from JS to mitigate XSS attacks
     httpOnly: true,
     // Do not send cookies on many cross-site requests to mitigates CSRF and cross-site attacks, see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite#lax
-    sameSite: sessionConfig.cookieSameSite as SameSiteOptions,
+    sameSite: sessionOptions.cookieSameSite as SameSiteOptions,
     // Set cookie for subdomain
-    domain: sessionConfig.domain
+    domain: sessionOptions.domain || undefined
   })
 }
 
@@ -67,7 +67,7 @@ export const deleteSession = async (event: H3Event) => {
 
 const newSession = async (event: H3Event) => {
   const runtimeConfig = useRuntimeConfig()
-  const sessionOptions = runtimeConfig.session.session
+  const sessionOptions = runtimeConfig.session.session as SessionOptions
   const now = new Date()
 
   // (Re-)Set cookie
@@ -132,12 +132,12 @@ function isSession (shape: unknown): shape is Session {
 }
 
 const ensureSession = async (event: H3Event) => {
-  const sessionConfig = useRuntimeConfig().session.session
+  const sessionOptions = useRuntimeConfig().session.session as SessionOptions
 
   let session = await getSession(event)
   if (!session) {
     session = await newSession(event)
-  } else if (sessionConfig.rolling) {
+  } else if (sessionOptions.rolling) {
     session = updateSessionExpirationDate(session, event)
   }
 
