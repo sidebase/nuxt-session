@@ -2,7 +2,7 @@ import { deleteCookie, eventHandler, H3Event, parseCookies, setCookie } from 'h3
 import { nanoid } from 'nanoid'
 import dayjs from 'dayjs'
 import equal from 'fast-deep-equal'
-import { SameSiteOptions, Session, SessionOptions, SessionContent } from '../../../../types'
+import { SameSiteOptions, Session, SessionOptions } from '../../../../types'
 import { dropStorageSession, getStorageSession, setStorageSession } from './storage'
 import { processSessionIp, getHashedIpAddress } from './ipPinning'
 import { SessionExpired } from './exceptions'
