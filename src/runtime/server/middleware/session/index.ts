@@ -67,36 +67,23 @@ export const deleteSession = async (event: H3Event) => {
   deleteCookie(event, SESSION_COOKIE_NAME)
 }
 
-const newSession = async (event: H3Event, sessionContent?: SessionContent) => {
-  const runtimeConfig = useRuntimeConfig()
-  const sessionOptions = runtimeConfig.session.session as SessionOptions
+const newSession = async (event: H3Event) => {
+  const sessionOptions = useRuntimeConfig().session.session as SessionOptions
   const now = new Date()
 
-  // (Re-)Set cookie
-  const sessionId = nanoid(sessionOptions.idLength)
-  safeSetCookie(event, SESSION_COOKIE_NAME, sessionId, now)
-
-  // Store session data in storage
   const session: Session = {
-    id: sessionId,
+    id: nanoid(sessionOptions.idLength),
     createdAt: now,
     ip: sessionOptions.ipPinning ? await getHashedIpAddress(event) : undefined
   }
-  if (sessionContent) {
-    Object.assign(session, sessionContent)
-  }
-  await setStorageSession(sessionId, session)
 
   return session
 }
 
-const newSessionIfModified = (event: H3Event, sessionContent: SessionContent) => {
-  const source = { ...sessionContent }
-  resEndProxy(event.res, async () => {
-    if (!equal(sessionContent, source)) {
-      await newSession(event, sessionContent)
-    }
-  })
+const setSession = async (session: Session, event: H3Event) => {
+  safeSetCookie(event, SESSION_COOKIE_NAME, session.id, session.createdAt)
+  await setStorageSession(session.id, session)
+  return session
 }
 
 const getSession = async (event: H3Event): Promise<null | Session> => {
@@ -112,8 +99,7 @@ const getSession = async (event: H3Event): Promise<null | Session> => {
     return null
   }
 
-  const runtimeConfig = useRuntimeConfig()
-  const sessionOptions = runtimeConfig.session.session as SessionOptions
+  const sessionOptions = useRuntimeConfig().session.session as SessionOptions
   const sessionExpiryInSeconds = sessionOptions.expiryInSeconds
 
   try {
@@ -150,21 +136,14 @@ const ensureSession = async (event: H3Event) => {
 
   let session = await getSession(event)
   if (!session) {
-    if (sessionOptions.saveUninitialized) {
-      session = await newSession(event)
-    } else {
-      // 1. Create an empty session object in the event context
-      event.context.session = {}
-      // 2. Create a new session if the object has been modified by any event handler
-      newSessionIfModified(event, event.context.session)
-      return null
-    }
+    session = await newSession(event)
   } else if (sessionOptions.rolling) {
     session = updateSessionExpirationDate(session, event)
   }
 
   event.context.sessionId = session.id
   event.context.session = session
+
   return session
 }
 
@@ -174,18 +153,21 @@ export default eventHandler(async (event: H3Event) => {
   // 1. Ensure that a session is present by either loading or creating one
   const session = await ensureSession(event)
   // 2. Save current state of the session
-  const source = { ...session }
+  const oldSession = { ...session }
 
   // 3. Setup a hook that saves any changed made to the session by the subsequent endpoints & middlewares
-  event.res.on('finish', async () => {
-    // Session id may not exist if session was deleted
-    const session = await getSession(event)
-    if (!session) {
-      return
-    }
+  resEndProxy(event.node.res, async () => {
+    const newSession = event.context.session as Session
+    const storedSession = await getSession(event)
 
-    if (sessionOptions.resave || !equal(event.context.session, source)) {
-      await setStorageSession(session.id, event.context.session)
+    if (!storedSession) {
+      // Save a new session if saveUninitialized is true, or if the session has been modified
+      if (sessionOptions.saveUninitialized || !equal(newSession, oldSession)) {
+        await setSession(newSession, event)
+      }
+    // Update the session in the storage if resave is true, or if the stored session has been modified
+    } else if (sessionOptions.resave || !equal(newSession, storedSession)) {
+      await setStorageSession(storedSession.id, newSession)
     }
   })
 })
