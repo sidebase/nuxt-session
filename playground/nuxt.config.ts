@@ -1,6 +1,6 @@
 import NuxtSession from '../src/module'
 
 export default defineNuxtConfig({
-  modules: [NuxtSession],
-  session: {}
+  // @ts-expect-error See https://github.com/nuxt/framework/issues/8931
+  modules: [NuxtSession]
 })

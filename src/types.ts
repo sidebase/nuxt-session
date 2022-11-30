@@ -1,4 +1,4 @@
-import type { BuiltinDriverName, CreateStorageOptions } from 'unstorage'
+import type { BuiltinDriverName } from 'unstorage'
 import type { FSStorageOptions } from 'unstorage/dist/drivers/fs'
 import type { KVOptions } from 'unstorage/dist/drivers/cloudflare-kv-binding'
 import type { KVHTTPOptions } from 'unstorage/dist/drivers/cloudflare-kv-http'
@@ -57,6 +57,22 @@ export interface SessionOptions {
    * @docs https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite
    */
   cookieSameSite: SameSiteOptions
+  /**
+   * Wether to set the `Secure` attribute for the session cookie
+   * @default true
+   * @example false
+   * @type boolean
+   * @docs https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#restrict_access_to_cookies
+   */
+  cookieSecure: boolean
+  /**
+   * Wether to set the `HttpOnly` attribute for the session cookie. When `HttpOnly` is set the session cookie will not be accessible from JavaScript, this can mitigate XSS attacks
+   * @default true
+   * @example false
+   * @type boolean
+   * @docs https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#restrict_access_to_cookies
+   */
+   cookieHttpOnly: boolean
   /**
    * Driver configuration for session-storage. Per default in-memory storage is used
    * @default { driver: 'memory', options: {} }
