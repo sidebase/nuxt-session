@@ -212,6 +212,8 @@ Here's what the full _default_ module configuration looks like:
     storePrefix: 'sessions',
     // The session cookie same site policy is `lax`
     cookieSameSite: 'lax',
+    // `Secure` attribute of session cookie is set to `true`
+    cookieSecure: true,
     // In-memory storage is used (these are `unjs/unstorage` options)
     storageOptions: {
         driver: 'memory',
@@ -301,7 +303,7 @@ A last reminder: This library was not written by crypto- or security-experts. So
 - Run `npm run dev:prepare` to generate type stubs.
 - Use `npm run dev` to start [the module playground](./playground) in development mode.
 - Run `npm run lint` to run eslint
-- Run `npm run type` to run typescheck via tsc
+- Run `npm run types` to run typescheck via tsc
 
 
 
