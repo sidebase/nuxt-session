@@ -66,6 +66,14 @@ export interface SessionOptions {
    */
   cookieSecure: boolean
   /**
+   * Wether to set the `HttpOnly` attribute for the session cookie
+   * @default true
+   * @example false
+   * @type boolean
+   * @docs https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#restrict_access_to_cookies
+   */
+   cookieHttpOnly: boolean
+  /**
    * Driver configuration for session-storage. Per default in-memory storage is used
    * @default { driver: 'memory', options: {} }
    * @example { driver: 'redis', options: {url: 'redis://localhost:6739' } }
