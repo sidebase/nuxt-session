@@ -222,7 +222,7 @@ Here's what the full _default_ module configuration looks like:
         options: {}
     },
     // The request-domain is strictly used for the cookie, no sub-domains allowed
-    domain: null,
+    domain: false,
     // Sessions aren't pinned to the user's IP address
     ipPinning: false
   },
