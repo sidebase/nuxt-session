@@ -212,6 +212,8 @@ Here's what the full _default_ module configuration looks like:
     storePrefix: 'sessions',
     // The session cookie same site policy is `lax`
     cookieSameSite: 'lax',
+    // `Secure` attribute of session cookie is set to `true`
+    cookieSecure: true,
     // In-memory storage is used (these are `unjs/unstorage` options)
     storageOptions: {
         driver: 'memory',
