@@ -10,7 +10,7 @@ import { useRuntimeConfig } from '#imports'
 const SESSION_COOKIE_NAME = 'sessionId'
 const safeSetCookie = (event: H3Event, name: string, value: string) => setCookie(event, name, value, {
   // Max age of cookie in seconds
-  maxAge: useRuntimeConfig().session.session.expiryInSeconds,
+  maxAge: useRuntimeConfig().session.session.expiryInSeconds || undefined,
   // Wether to send cookie via HTTPs to mitigate man-in-the-middle attacks
   secure: useRuntimeConfig().session.session.cookieSecure,
   // Wether to send cookie via HTTP requests and not allowing access of cookie from JS to mitigate XSS attacks
@@ -18,7 +18,7 @@ const safeSetCookie = (event: H3Event, name: string, value: string) => setCookie
   // Do not send cookies on many cross-site requests to mitigates CSRF and cross-site attacks, see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite#lax
   sameSite: useRuntimeConfig().session.session.cookieSameSite as SameSiteOptions,
   // Set cookie for subdomain
-  domain: useRuntimeConfig().session.session.domain
+  domain: useRuntimeConfig().session.session.domain || undefined
 })
 
 const checkSessionExpirationTime = (session: Session, sessionExpiryInSeconds: number) => {
@@ -96,7 +96,7 @@ const getSession = async (event: H3Event): Promise<null | Session> => {
 
   try {
     // 3. Is the session not expired?
-    if (sessionExpiryInSeconds !== null) {
+    if (sessionExpiryInSeconds) {
       checkSessionExpirationTime(session, sessionExpiryInSeconds)
     }
 
