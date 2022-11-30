@@ -66,7 +66,7 @@ export interface SessionOptions {
    */
   cookieSecure: boolean
   /**
-   * Wether to set the `HttpOnly` attribute for the session cookie
+   * Wether to set the `HttpOnly` attribute for the session cookie. When `HttpOnly` is set the session cookie will not be accessible from JavaScript, this can mitigate XSS attacks
    * @default true
    * @example false
    * @type boolean
