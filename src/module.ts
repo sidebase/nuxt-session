@@ -19,6 +19,7 @@ const defaults: FilledModuleOptions = {
     storePrefix: 'sessions',
     cookieSameSite: 'lax',
     cookieSecure: true,
+    cookieHttpOnly: true,
     storageOptions: {
       driver: 'memory',
       options: {}

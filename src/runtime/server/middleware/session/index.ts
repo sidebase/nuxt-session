@@ -19,8 +19,8 @@ const safeSetCookie = (event: H3Event, name: string, value: string, createdAt: D
     expires: expirationDate,
     // Wether to send cookie via HTTPs to mitigate man-in-the-middle attacks
     secure: sessionOptions.cookieSecure,
-    // Only send cookie via HTTP requests, do not allow access of cookie from JS to mitigate XSS attacks
-    httpOnly: true,
+    // Wether to send cookie via HTTP requests and not allowing access of cookie from JS to mitigate XSS attacks
+    httpOnly: sessionOptions.cookieHttpOnly,
     // Do not send cookies on many cross-site requests to mitigates CSRF and cross-site attacks, see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite#lax
     sameSite: sessionOptions.cookieSameSite as SameSiteOptions,
     // Set cookie for subdomain
