@@ -115,17 +115,12 @@ const getSession = async (event: H3Event): Promise<null | Session> => {
 
 const getImmutableSession = (session: Session) => {
   const immutableSession = { ...session }
+  const properties = ['id', 'createdAt', 'ip']
 
-  Object.defineProperty(immutableSession, 'id', {
-    writable: false
-  })
-
-  Object.defineProperty(immutableSession, 'createdAt', {
-    writable: false
-  })
-
-  Object.defineProperty(immutableSession, 'ip', {
-    writable: false
+  properties.forEach((property) => {
+    Object.defineProperty(immutableSession, property, {
+      writable: false
+    })
   })
 
   return immutableSession as Session
