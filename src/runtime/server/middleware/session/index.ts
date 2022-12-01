@@ -14,8 +14,8 @@ const safeSetCookie = (event: H3Event, name: string, value: string) => setCookie
   maxAge: useRuntimeConfig().session.session.expiryInSeconds,
   // Wether to send cookie via HTTPs to mitigate man-in-the-middle attacks
   secure: useRuntimeConfig().session.session.cookieSecure,
-  // Only send cookie via HTTP requests, do not allow access of cookie from JS to mitigate XSS attacks
-  httpOnly: true,
+  // Wether to send cookie via HTTP requests and not allowing access of cookie from JS to mitigate XSS attacks
+  httpOnly: useRuntimeConfig().session.session.cookieHttpOnly,
   // Do not send cookies on many cross-site requests to mitigates CSRF and cross-site attacks, see https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Set-Cookie/SameSite#lax
   sameSite: useRuntimeConfig().session.session.cookieSameSite as SameSiteOptions,
   // Set cookie for subdomain
