@@ -113,6 +113,24 @@ const getSession = async (event: H3Event): Promise<null | Session> => {
   return session
 }
 
+const getImmutableSession = (session: Session) => {
+  const immutableSession = { ...session }
+
+  Object.defineProperty(immutableSession, 'id', {
+    writable: false
+  })
+
+  Object.defineProperty(immutableSession, 'createdAt', {
+    writable: false
+  })
+
+  Object.defineProperty(immutableSession, 'ip', {
+    writable: false
+  })
+
+  return immutableSession as Session
+}
+
 function isSession (shape: unknown): shape is Session {
   return typeof shape === 'object' && !!shape && 'id' in shape && 'createdAt' in shape
 }
@@ -124,7 +142,7 @@ const ensureSession = async (event: H3Event) => {
   }
 
   event.context.sessionId = session.id
-  event.context.session = session
+  event.context.session = getImmutableSession(session)
   return session
 }
 
