@@ -183,9 +183,15 @@ export interface ModulePublicRuntimeConfig {
 }
 
 export declare interface Session {
-  id: string;
-  createdAt: Date;
-  ip?: string;
+  readonly id: string;
+  readonly createdAt: Date;
+  readonly ip?: string;
 
   [key: string]: any;
+}
+
+declare module 'h3' {
+  interface H3EventContext {
+    session: Session
+  }
 }
