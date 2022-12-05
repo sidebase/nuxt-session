@@ -99,6 +99,13 @@ export interface SessionOptions {
    */
   ipPinning: SessionIpPinningOptions|boolean,
   /**
+   * Force the session identifier cookie to be set on every response. The expiration is reset to the original expiryInSeconds, resetting the expiration countdown.
+   * @default false
+   * @example true
+   * @type boolean
+   */
+  rolling: boolean,
+  /**
    * Forces a session that is "uninitialized" to be saved to the store. A session is uninitialized when it is new but not modified.
    * Choosing false is useful for implementing login sessions, reducing server storage usage, or complying with laws that require permission before setting a cookie.
    * @default true

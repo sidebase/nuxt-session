@@ -225,6 +225,8 @@ Here's what the full _default_ module configuration looks like:
     domain: null,
     // Sessions aren't pinned to the user's IP address
     ipPinning: false,
+    // Expiration of the sessions are not reset to the original expiryInSeconds on every request
+    rolling: false,
     // Uninitialized, resp. unmodified sessions are saved to the store, so session cookies are set at the first response
     saveUninitialized: true
   },
