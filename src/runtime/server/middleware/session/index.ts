@@ -28,7 +28,7 @@ const safeSetCookie = (event: H3Event, name: string, value: string, createdAt: D
   })
 }
 
-const checkSessionExpirationTime = (session: Session, sessionExpiryInSeconds: number) => {
+export const checkSessionExpirationTime = (session: Session, sessionExpiryInSeconds: number) => {
   const now = dayjs()
   if (now.diff(dayjs(session.createdAt), 'seconds') > sessionExpiryInSeconds) {
     throw new SessionExpired()
