@@ -189,3 +189,9 @@ export declare interface Session {
 
   [key: string]: any;
 }
+
+declare module 'h3' {
+  interface H3EventContext {
+    session: Session
+  }
+}
