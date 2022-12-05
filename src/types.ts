@@ -28,12 +28,12 @@ export interface SessionIpPinningOptions {
 
 export interface SessionOptions {
   /**
-   * Set the session duration in seconds. Once the session expires, a new one with a new id will be created. Set to `null` for infinite sessions
+   * Set the session duration in seconds. Once the session expires, a new one with a new id will be created. Set to `false` for infinite sessions
    * @default 600
    * @example 30
-   * @type number | null
+   * @type number | false
    */
-  expiryInSeconds: number | null
+  expiryInSeconds: number | false
   /**
    * How many characters the random session id should be long
    * @default 64
@@ -81,13 +81,13 @@ export interface SessionOptions {
    */
   storageOptions: StorageOptions,
   /**
-   * Set the domain the session cookie will be receivable by. Setting `domain: null` results in setting the domain the cookie is initially set on. Specifying a domain will allow the domain and all its sub-domains.
-   * @default null
+   * Set the domain the session cookie will be receivable by. Setting `domain: false` results in setting the domain the cookie is initially set on. Specifying a domain will allow the domain and all its sub-domains.
+   * @default false
    * @example '.example.com'
-   * @type string | null
+   * @type string | false
    * @docs https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#define_where_cookies_are_sent
    */
-  domain: string | null,
+  domain: string | false,
   /**
    * Whether to pin sessions to the user's IP (i.e. Different IP means a different session)
    * @default false
