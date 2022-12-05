@@ -104,7 +104,7 @@ const getSession = async (event: H3Event): Promise<null | Session> => {
 
   try {
     // 3. Is the session not expired?
-    if (sessionExpiryInSeconds) {
+    if (sessionExpiryInSeconds !== false) {
       checkSessionExpirationTime(session, sessionExpiryInSeconds)
     }
 
