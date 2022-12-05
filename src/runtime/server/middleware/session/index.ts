@@ -1,6 +1,7 @@
 import { deleteCookie, eventHandler, H3Event, parseCookies, setCookie } from 'h3'
 import { nanoid } from 'nanoid'
 import dayjs from 'dayjs'
+import equal from 'fast-deep-equal'
 import { SameSiteOptions, Session, SessionOptions } from '../../../../types'
 import { dropStorageSession, getStorageSession, setStorageSession } from './storage'
 import { processSessionIp, getHashedIpAddress } from './ipPinning'
@@ -147,10 +148,14 @@ const ensureSession = async (event: H3Event) => {
 }
 
 export default eventHandler(async (event: H3Event) => {
-  // 1. Ensure that a session is present by either loading or creating one
-  await ensureSession(event)
+  const sessionOptions = useRuntimeConfig().session.session as SessionOptions
 
-  // 2. Setup a hook that saves any changed made to the session by the subsequent endpoints & middlewares
+  // 1. Ensure that a session is present by either loading or creating one
+  const session = await ensureSession(event)
+  // 2. Save current state of the session
+  const source = { ...session }
+
+  // 3. Setup a hook that saves any changed made to the session by the subsequent endpoints & middlewares
   event.res.on('finish', async () => {
     // Session id may not exist if session was deleted
     const session = await getSession(event)
@@ -158,6 +163,8 @@ export default eventHandler(async (event: H3Event) => {
       return
     }
 
-    await setStorageSession(session.id, event.context.session)
+    if (sessionOptions.resave || !equal(event.context.session, source)) {
+      await setStorageSession(session.id, event.context.session)
+    }
   })
 })
