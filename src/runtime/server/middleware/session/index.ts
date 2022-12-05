@@ -11,7 +11,7 @@ import { useRuntimeConfig } from '#imports'
 const SESSION_COOKIE_NAME = 'sessionId'
 const safeSetCookie = (event: H3Event, name: string, value: string, createdAt: Date) => {
   const sessionOptions = useRuntimeConfig().session.session as SessionOptions
-  const expirationDate = sessionOptions.expiryInSeconds
+  const expirationDate = sessionOptions.expiryInSeconds !== false
     ? new Date(createdAt.getTime() + sessionOptions.expiryInSeconds * 1000)
     : undefined
 
@@ -105,7 +105,7 @@ const getSession = async (event: H3Event): Promise<null | Session> => {
 
   try {
     // 3. Is the session not expired?
-    if (sessionExpiryInSeconds !== null) {
+    if (sessionExpiryInSeconds !== false) {
       checkSessionExpirationTime(session, sessionExpiryInSeconds)
     }
 
