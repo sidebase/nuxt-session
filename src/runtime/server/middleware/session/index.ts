@@ -127,7 +127,8 @@ const getImmutableSession = (session: Session) => {
 
   properties.forEach((property) => {
     Object.defineProperty(immutableSession, property, {
-      writable: false
+      writable: false,
+      configurable: false
     })
   })
 
