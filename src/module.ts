@@ -24,8 +24,9 @@ const defaults: FilledModuleOptions = {
       driver: 'memory',
       options: {}
     },
-    domain: false,
-    ipPinning: false as boolean|SessionIpPinningOptions
+    domain: null,
+    ipPinning: false as boolean|SessionIpPinningOptions,
+    rolling: false
   },
   api: {
     isEnabled: true,

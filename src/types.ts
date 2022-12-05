@@ -98,6 +98,13 @@ export interface SessionOptions {
    * @type {SessionIpPinningOptions|boolean}
    */
   ipPinning: SessionIpPinningOptions|boolean,
+  /**
+   * Force the session identifier cookie to be set on every response. The expiration is reset to the original expiryInSeconds, resetting the expiration countdown.
+   * @default false
+   * @example true
+   * @type boolean
+   */
+  rolling: boolean
 }
 
 export interface ApiOptions {

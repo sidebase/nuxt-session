@@ -224,7 +224,9 @@ Here's what the full _default_ module configuration looks like:
     // The request-domain is strictly used for the cookie, no sub-domains allowed
     domain: false,
     // Sessions aren't pinned to the user's IP address
-    ipPinning: false
+    ipPinning: false,
+    // Expiration of the sessions are not reset to the original expiryInSeconds on every request
+    rolling: false
   },
   api: {
     // The API is enabled
