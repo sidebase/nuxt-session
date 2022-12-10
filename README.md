@@ -227,7 +227,7 @@ Here's what the full _default_ module configuration looks like:
     ipPinning: false,
     // Expiration of the sessions are not reset to the original expiryInSeconds on every request
     rolling: false,
-    // Uninitialized, resp. unmodified sessions are saved to the store, so session cookies are set at the first response
+    // Forces unmodified session to be saved to the store. Setting `false` is useful for implementing login sessions, reducing server storage usage, or complying with laws that require permission before setting a cookie
     saveUninitialized: true,
     // Sessions are saved to the store, even if they were never modified during the request
     resave: true
