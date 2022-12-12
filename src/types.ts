@@ -115,6 +115,8 @@ export interface SessionOptions {
   saveUninitialized: boolean,
   /**
     * Forces the session to be saved back to the session store, even if the session was never modified during the request.
+    * Depending on your store this may be necessary, but it can also create race conditions where a client makes two parallel requests to your server,
+    * and changes made to the session in one request may get overwritten when the other request ends, even if it made no changes (this behavior also depends on what store you're using).
     * @default true
     * @example false
     * @type boolean

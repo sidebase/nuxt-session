@@ -229,7 +229,7 @@ Here's what the full _default_ module configuration looks like:
     rolling: false,
     // Forces unmodified session to be saved to the store. Setting `false` is useful for implementing login sessions, reducing server storage usage, or complying with laws that require permission before setting a cookie
     saveUninitialized: true,
-    // Sessions are saved to the store, even if they were never modified during the request
+    // Sessions are saved to the store, even if they were never modified during the request. Depending on your store this may be necessary, but it can also create race conditions where a client makes two parallel requests to your server, and changes made to the session in one request may get overwritten when the other request ends
     resave: true
   },
   api: {
