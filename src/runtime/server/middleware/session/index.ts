@@ -144,7 +144,7 @@ const ensureSession = async (event: H3Event) => {
   event.context.sessionId = session.id
   event.context.session = session
 
-  return session
+  return { ...session }
 }
 
 export default eventHandler(async (event: H3Event) => {
@@ -152,22 +152,20 @@ export default eventHandler(async (event: H3Event) => {
 
   // 1. Ensure that a session is present by either loading or creating one
   const session = await ensureSession(event)
-  // 2. Save current state of the session
-  const oldSession = { ...session }
 
-  // 3. Setup a hook that saves any changed made to the session by the subsequent endpoints & middlewares
+  // 2. Setup a hook that saves any changed made to the session by the subsequent endpoints & middlewares
   resEndProxy(event.node.res, async () => {
-    const newSession = event.context.session as Session
+    const contextSession = event.context.session as Session
     const storedSession = await getSession(event)
 
     if (!storedSession) {
-      // Save a new session if saveUninitialized is true, or if the session has been modified
-      if (sessionOptions.saveUninitialized || !equal(newSession, oldSession)) {
-        await setSession(newSession, event)
+      // If there isn't a session in the storage yet, save a new session if saveUninitialized is true, or if the session in the event context has been modified
+      if (sessionOptions.saveUninitialized || !equal(contextSession, session)) {
+        await setSession(contextSession, event)
       }
-    // Update the session in the storage if resave is true, or if the stored session has been modified
-    } else if (sessionOptions.resave || !equal(newSession, storedSession)) {
-      await setStorageSession(storedSession.id, newSession)
+    // Update the session in the storage if resave is true, or if the session in the event context has been modified
+    } else if (sessionOptions.resave || !equal(contextSession, storedSession)) {
+      await setStorageSession(storedSession.id, contextSession)
     }
   })
 })
