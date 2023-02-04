@@ -7,7 +7,7 @@
 [![GitHub stars](https://badgen.net/github/stars/sidebase/nuxt-session)](https://GitHub.com/sidebase/nuxt-session/)
 [![License][license-src]][license-href]
 [![Follow us on Twitter](https://badgen.net/badge/icon/twitter?icon=twitter&label)](https://twitter.com/sidebase_io)
-[![Join our Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/9MUHR8WT9B)
+[![Join our Discord](https://badgen.net/badge/icon/discord?icon=discord&label)](https://discord.gg/NDDgQkcv3s)
 
 > Nuxt session middleware to get a persistent session per app user, e.g., to store data across multiple requests. The nuxt session module provides the `useSession()` composable out of the box and sets up API endpoints to interact with your session to make working with sessions feel like a breeze.
 
@@ -91,7 +91,7 @@ First of all: Try out the playground if you want to test-drive this package and 
 The `nuxt-session` maintains sessions: Persistent data across different requests by the same client (or: "user"). To maintain these sessions, `nuxt-session` sets a cookie with a unique client id for the currently connected client. Then after the cookie is set, the client will be uniquely identifiable by the server as long as:
 - the client sends this cookie on all subsequent requests,
 - the clients stay is shorter than the maximum session duration (default: 10 minutes, can be infinite in theory),
-- the server does not loose it's data (e.g., due to a broken hard-drive)
+- the server does not lose its data (e.g., due to a broken hard-drive)
 
 We call this "stay" that lasts as long as the above criteria are met a session.
 
@@ -186,7 +186,7 @@ export default eventHandler((event) => {
 
 All changes made to the `event.context.session` are automatically stored for subsequent requests by `nuxt-session`. So the count is set to `0` on the first request and then increases by `1` on every subsequent request.
 
-The server-side session also contains it's own meta-data of the form:
+The server-side session also contains its own meta-data of the form:
 ```ts
 declare interface Session {
   id: string
