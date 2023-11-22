@@ -1,4 +1,4 @@
-**DEPRECATION NOTICE:** `nuxt-session` will be depreacated at the 11.12.2023 - read https://github.com/sidebase/nuxt-session/issues/91 for reasoning and process.
+**DEPRECATION NOTICE:** `nuxt-session` will be depreacated at the 11.12.2023 - read https://github.com/sidebase/nuxt-session/issues/91 for reasoning and process. We recommend migrating to [`h3` sessions](https://github.com/unjs/h3#session) for your applications.
 
 ![logo of nuxt session](./.github/session.png)
 
