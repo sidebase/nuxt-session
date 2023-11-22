@@ -1,3 +1,5 @@
+**DEPRECATION NOTICE:** `nuxt-session` will be depreacated at the 11.12.2023 - read https://github.com/sidebase/nuxt-session/issues/91 for reasoning and process.
+
 ![logo of nuxt session](./.github/session.png)
 
 # nuxt-session
