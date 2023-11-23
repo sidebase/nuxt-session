@@ -104,7 +104,15 @@ export interface SessionOptions {
    * @example true
    * @type boolean
    */
-  rolling: boolean
+  rolling: boolean,
+  /**
+   * Forces a session that is "uninitialized" to be saved to the store. A session is uninitialized when it is new but not modified.
+   * Choosing false is useful for implementing login sessions, reducing server storage usage, or complying with laws that require permission before setting a cookie.
+   * @default true
+   * @example false
+   * @type boolean
+   */
+  saveUninitialized: boolean
 }
 
 export interface ApiOptions {
@@ -187,5 +195,9 @@ export declare interface Session {
   createdAt: Date;
   ip?: string;
 
+  [key: string]: any;
+}
+
+export declare interface SessionContent {
   [key: string]: any;
 }
