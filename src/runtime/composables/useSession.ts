@@ -1,10 +1,12 @@
-import { useFetch, createError } from '#app'
+import { useFetch, createError, useRequestHeaders, useNuxtApp, useRuntimeConfig } from '#app'
 import { nanoid } from 'nanoid'
 import { Ref, ref } from 'vue'
 import type { Session, SupportedSessionApiMethods } from '../../types'
-import { useRuntimeConfig } from '#imports'
 
 type SessionData = Record<string, any>
+
+// Key for the session value in the nuxt payload
+const SESSION_VALUE_KEY = 'nuxt-session:session-value'
 
 declare interface ComposableOptions {
   fetchSessionOnInitialization: boolean
@@ -26,14 +28,18 @@ export default async (options: ComposableOptions = {
       throw createError({ message, statusCode: 500 })
     }
 
+    const nuxt = useNuxtApp()
+
     // Return the fetch so that it is executed in the component context + to allow further introspection by the user if desired
     return useFetch(config.api.basePath, {
+      // Pass the cookie from the current request to the session-api
+      headers: {
+        cookie: useRequestHeaders(['cookie']).cookie ?? ''
+      },
+
       // Method must be capitalized for HTTP-request to work
       method: method.toUpperCase(),
       body,
-
-      // Do not fetch on server, as the cookie is stored and sent by the client
-      server: false,
 
       // Never cache
       key: nanoid(),
@@ -43,6 +49,12 @@ export default async (options: ComposableOptions = {
         const data = response._data
 
         session.value = data
+
+        // If we are on the server, store session value in nuxt payload to avoid hydration issues
+        if (process.server) {
+          nuxt.payload.state[SESSION_VALUE_KEY] = data
+        }
+
         return data
       }
     })
@@ -75,7 +87,13 @@ export default async (options: ComposableOptions = {
 
   // Initialize session object
   if (options.fetchSessionOnInitialization) {
-    await refresh()
+    const nuxt = useNuxtApp()
+
+    if (nuxt.isHydrating) {
+      session.value = nuxt.payload.state[SESSION_VALUE_KEY]
+    } else {
+      await refresh()
+    }
   }
 
   return {
