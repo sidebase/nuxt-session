@@ -256,12 +256,28 @@ You can use any storage driver supported by [unjs/unstorage](https://github.com/
 // file: ~/nuxt.config.ts
 export default defineNuxtConfig({
   modules: ['@sidebase/nuxt-session'],
+  // the build time config is needed, so that the nuxt module selects the right driver module during build 
   session: {
     session: {
       storageOptions: {
         driver: 'redis',
         options: {
-          url: 'redis://localhost:6379'
+        }
+      }
+    }
+  },
+  // the runtime config is needed, to specify the shape of the config object.
+  // a dummy value for the url, that can be overridden by nuxt's runtime env var system
+  // https://nuxt.com/docs/guide/going-further/runtime-config#environment-variables
+  runtimeConfig: {
+    session: {
+      session: {
+        storageOptions: {
+          driver: 'redis',
+          options: {
+            // overriden by NUXT_SESSION_SESSION_STORAGE_OPTIONS_OPTIONS_URL env var
+            url: 'UNDEFINED' // you need to define the key, with a dummy value
+          }
         }
       }
     }
