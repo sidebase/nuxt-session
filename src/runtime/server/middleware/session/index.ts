@@ -121,6 +121,20 @@ const getSession = async (event: H3Event): Promise<null | Session> => {
   return session
 }
 
+const getImmutableSession = (session: Session) => {
+  const immutableSession = { ...session }
+  const properties = ['id', 'createdAt', 'ip']
+
+  properties.forEach((property) => {
+    Object.defineProperty(immutableSession, property, {
+      writable: false,
+      configurable: false
+    })
+  })
+
+  return immutableSession as Session
+}
+
 const updateSessionExpirationDate = (session: Session, event: H3Event) => {
   const now = new Date()
   safeSetCookie(event, SESSION_COOKIE_NAME, session.id, now)
@@ -142,7 +156,7 @@ const ensureSession = async (event: H3Event) => {
   }
 
   event.context.sessionId = session.id
-  event.context.session = session
+  event.context.session = getImmutableSession(session)
   return session
 }
 
