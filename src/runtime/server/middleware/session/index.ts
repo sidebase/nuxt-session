@@ -1,10 +1,12 @@
 import { deleteCookie, eventHandler, H3Event, parseCookies, setCookie } from 'h3'
 import { nanoid } from 'nanoid'
 import dayjs from 'dayjs'
+import equal from 'fast-deep-equal'
 import { SameSiteOptions, Session, SessionOptions } from '../../../../types'
 import { dropStorageSession, getStorageSession, setStorageSession } from './storage'
 import { processSessionIp, getHashedIpAddress } from './ipPinning'
 import { SessionExpired } from './exceptions'
+import { resEndProxy } from './resEndProxy'
 import { useRuntimeConfig } from '#imports'
 
 const SESSION_COOKIE_NAME = 'sessionId'
@@ -66,22 +68,21 @@ export const deleteSession = async (event: H3Event) => {
 }
 
 const newSession = async (event: H3Event) => {
-  const runtimeConfig = useRuntimeConfig()
-  const sessionOptions = runtimeConfig.session.session as SessionOptions
+  const sessionOptions = useRuntimeConfig().session.session as SessionOptions
   const now = new Date()
 
-  // (Re-)Set cookie
-  const sessionId = nanoid(sessionOptions.idLength)
-  safeSetCookie(event, SESSION_COOKIE_NAME, sessionId, now)
-
-  // Store session data in storage
   const session: Session = {
-    id: sessionId,
+    id: nanoid(sessionOptions.idLength),
     createdAt: now,
     ip: sessionOptions.ipPinning ? await getHashedIpAddress(event) : undefined
   }
-  await setStorageSession(sessionId, session)
 
+  return session
+}
+
+const setSession = async (session: Session, event: H3Event) => {
+  safeSetCookie(event, SESSION_COOKIE_NAME, session.id, session.createdAt)
+  await setStorageSession(session.id, session)
   return session
 }
 
@@ -98,8 +99,7 @@ const getSession = async (event: H3Event): Promise<null | Session> => {
     return null
   }
 
-  const runtimeConfig = useRuntimeConfig()
-  const sessionOptions = runtimeConfig.session.session as SessionOptions
+  const sessionOptions = useRuntimeConfig().session.session as SessionOptions
   const sessionExpiryInSeconds = sessionOptions.expiryInSeconds
 
   try {
@@ -143,21 +143,29 @@ const ensureSession = async (event: H3Event) => {
 
   event.context.sessionId = session.id
   event.context.session = session
-  return session
+
+  return { ...session }
 }
 
 export default eventHandler(async (event: H3Event) => {
+  const sessionOptions = useRuntimeConfig().session.session as SessionOptions
+
   // 1. Ensure that a session is present by either loading or creating one
-  await ensureSession(event)
+  const session = await ensureSession(event)
 
   // 2. Setup a hook that saves any changed made to the session by the subsequent endpoints & middlewares
-  event.res.on('finish', async () => {
-    // Session id may not exist if session was deleted
-    const session = await getSession(event)
-    if (!session) {
-      return
-    }
+  resEndProxy(event.node.res, async () => {
+    const contextSession = event.context.session as Session
+    const storedSession = await getSession(event)
 
-    await setStorageSession(session.id, event.context.session)
+    if (!storedSession) {
+      // If there isn't a session in the storage yet, save a new session if saveUninitialized is true, or if the session in the event context has been modified
+      if (sessionOptions.saveUninitialized || !equal(contextSession, session)) {
+        await setSession(contextSession, event)
+      }
+    // Update the session in the storage if resave is true, or if the session in the event context has been modified
+    } else if (sessionOptions.resave || !equal(contextSession, storedSession)) {
+      await setStorageSession(storedSession.id, contextSession)
+    }
   })
 })
